@@ -128,3 +128,10 @@
     @apply font-sans;
   }
 }
+
+/* HaloKasir auth — blue primary + green accent (Figma “Auth Page > Light Mode”) */
+.auth-root {
+  --primary: oklch(0.52 0.17 252);
+  --primary-foreground: oklch(0.99 0.01 252);
+  --ring: oklch(0.62 0.14 252);
+}
