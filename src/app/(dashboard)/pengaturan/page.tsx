@@ -1,5 +1,5 @@
 import { DashboardPlaceholder } from "@/components/features/dashboard/dashboard-placeholder"
 
-export default function InventoryPage() {
-  return <DashboardPlaceholder title="Persediaan" />
+export default function PengaturanPage() {
+  return <DashboardPlaceholder title="Pengaturan" />
 }

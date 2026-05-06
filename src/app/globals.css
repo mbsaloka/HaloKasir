@@ -55,8 +55,9 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  /* Brand primary — Halo Kasir */
+  --primary: #1d8ad8;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -66,7 +67,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: color-mix(in srgb, var(--primary) 45%, transparent);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -90,8 +91,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: #1d8ad8;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -129,9 +130,9 @@
   }
 }
 
-/* HaloKasir auth — blue primary + green accent (Figma “Auth Page > Light Mode”) */
+/* Halaman auth — sama dengan primary aplikasi */
 .auth-root {
-  --primary: oklch(0.52 0.17 252);
-  --primary-foreground: oklch(0.99 0.01 252);
-  --ring: oklch(0.62 0.14 252);
+  --primary: #1d8ad8;
+  --primary-foreground: #ffffff;
+  --ring: color-mix(in srgb, var(--primary) 45%, transparent);
 }
