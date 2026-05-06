@@ -51,7 +51,7 @@ export function DashboardHeader({ onMenuToggle }: DashboardHeaderProps) {
           <ProfileMenu />
         </div>
       </div>
-      <DashboardInlineNav />
+      {/* <DashboardInlineNav /> */}
     </header>
   )
 }
