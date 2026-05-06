@@ -1,5 +1,5 @@
-import { DashboardPlaceholder } from "@/components/features/dashboard/dashboard-placeholder"
+import { redirect } from "next/navigation"
 
 export default function BarangMasukPage() {
-  return <DashboardPlaceholder title="Barang Masuk" />
+  redirect("/purchase/incoming")
 }

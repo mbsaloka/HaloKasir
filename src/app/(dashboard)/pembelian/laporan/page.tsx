@@ -1,5 +1,5 @@
-import { DashboardPlaceholder } from "@/components/features/dashboard/dashboard-placeholder"
+import { redirect } from "next/navigation"
 
 export default function LaporanPembelianPage() {
-  return <DashboardPlaceholder title="Laporan Pembelian" />
+  redirect("/purchase/report")
 }

@@ -74,7 +74,7 @@ function NavSection({
   const groupShouldOpen =
     entry.id === "penjualan"
       ? pathname.startsWith("/penjualan") || pathname.startsWith("/sales")
-      : pathname.startsWith("/pembelian")
+      : pathname.startsWith("/pembelian") || pathname.startsWith("/purchase")
 
   return (
     <Collapsible defaultOpen={groupShouldOpen || childActive}>

@@ -33,10 +33,24 @@ const ROUTES: {
     ],
   },
   {
+    pattern: /^\/membership\/?$/,
+    crumbs: () => [
+      { label: "Beranda", href: "/" },
+      { label: "Keanggotaan" },
+    ],
+  },
+  {
     pattern: /^\/pengaturan\/?$/,
     crumbs: () => [
       { label: "Beranda", href: "/" },
       { label: "Pengaturan" },
+    ],
+  },
+  {
+    pattern: /^\/profile\/?$/,
+    crumbs: () => [
+      { label: "Beranda", href: "/" },
+      { label: "Profil" },
     ],
   },
   {
@@ -72,10 +86,26 @@ const ROUTES: {
     ],
   },
   {
+    pattern: /^\/purchase\/incoming\/?$/,
+    crumbs: () => [
+      { label: "Beranda", href: "/" },
+      { label: "Pembelian", href: "/purchase/incoming" },
+      { label: "Barang Masuk" },
+    ],
+  },
+  {
+    pattern: /^\/purchase\/report\/?$/,
+    crumbs: () => [
+      { label: "Beranda", href: "/" },
+      { label: "Pembelian", href: "/purchase/incoming" },
+      { label: "Laporan Pembelian" },
+    ],
+  },
+  {
     pattern: /^\/pembelian\/barang-masuk\/?$/,
     crumbs: () => [
       { label: "Beranda", href: "/" },
-      { label: "Pembelian", href: "/pembelian/barang-masuk" },
+      { label: "Pembelian", href: "/purchase/incoming" },
       { label: "Barang Masuk" },
     ],
   },
@@ -83,7 +113,7 @@ const ROUTES: {
     pattern: /^\/pembelian\/laporan\/?$/,
     crumbs: () => [
       { label: "Beranda", href: "/" },
-      { label: "Pembelian", href: "/pembelian/barang-masuk" },
+      { label: "Pembelian", href: "/purchase/incoming" },
       { label: "Laporan Pembelian" },
     ],
   },
@@ -123,12 +153,17 @@ function segmentLabel(seg: string): string {
     kasir: "Kasir",
     inventory: "Persediaan",
     pelanggan: "Pelanggan",
+    membership: "Keanggotaan",
     pengaturan: "Pengaturan",
     penjualan: "Penjualan",
     pembelian: "Pembelian",
     laporan: "Laporan",
     transaksi: "Transaksi",
     "barang-masuk": "Barang Masuk",
+    purchase: "Pembelian",
+    incoming: "Barang Masuk",
+    report: "Laporan",
+    profile: "Profil",
   }
   return map[seg] ?? seg
 }

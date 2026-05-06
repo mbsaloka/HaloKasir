@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ChevronDownIcon, LogOutIcon, SettingsIcon, UserIcon } from "lucide-react"
 
@@ -49,9 +50,11 @@ export function ProfileMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="gap-2">
-          <UserIcon className="size-4" />
-          Profil
+        <DropdownMenuItem asChild>
+          <Link href="/profile" className="flex cursor-pointer items-center gap-2">
+            <UserIcon className="size-4" />
+            Profil
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem className="gap-2">
           <SettingsIcon className="size-4" />

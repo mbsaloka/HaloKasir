@@ -60,18 +60,18 @@ export const dashboardNavMain: NavEntry[] = [
     icon: ShoppingBag,
     children: [
       {
-        href: "/pembelian/barang-masuk",
+        href: "/purchase/incoming",
         label: "Barang Masuk",
         icon: PackagePlus,
       },
       {
-        href: "/pembelian/laporan",
+        href: "/purchase/report",
         label: "Laporan Pembelian",
         icon: PieChart,
       },
     ],
   },
-  { type: "link", href: "/pelanggan", label: "Pelanggan", icon: Users },
+  { type: "link", href: "/membership", label: "Pelanggan", icon: Users },
 ]
 
 export const dashboardNavFooter: NavEntry[] = [
