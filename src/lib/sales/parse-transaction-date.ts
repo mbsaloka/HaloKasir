@@ -1,4 +1,4 @@
-/** Parse string tanggal dari kolom mock `transactionAt` */
+/** Parse string tanggal dari kolom `transactionAt`. */
 export function parseTransactionAtDisplay(s: string): Date {
   const [datePart, timePart] = s.split(/\s+/)
   const [y, m, d] = datePart.split("/").map(Number)

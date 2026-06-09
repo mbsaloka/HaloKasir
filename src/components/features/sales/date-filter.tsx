@@ -15,7 +15,7 @@ type DateFilterProps = {
   className?: string
 }
 
-/** Pemilih rentang tanggal (mock — tidak mengubah data server) */
+/** Pemilih rentang tanggal. */
 export function DateFilter({
   labelFrom = "Dari",
   labelTo = "Sampai",

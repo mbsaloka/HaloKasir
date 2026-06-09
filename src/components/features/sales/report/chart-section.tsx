@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { SalesChart } from "@/components/features/sales/charts/sales-chart"
-import type { ProfitRevenuePoint } from "@/lib/sales/mock-data"
+import type { ProfitRevenuePoint } from "@/lib/sales/types"
 
 type ChartSectionProps = {
   data: ProfitRevenuePoint[]

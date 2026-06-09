@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts"
 
-import type { ProfitRevenuePoint } from "@/lib/sales/mock-data"
+import type { ProfitRevenuePoint } from "@/lib/sales/types"
 import { cn } from "@/lib/utils"
 
 const REVENUE_COLOR = "#1D8AD8"

@@ -4,7 +4,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { TransactionTable } from "@/components/features/sales/transaction-table"
-import type { SalesTransaction } from "@/lib/sales/mock-data"
+import type { SalesTransaction } from "@/lib/sales/types"
 
 type TransactionListProps = {
   rows: SalesTransaction[]

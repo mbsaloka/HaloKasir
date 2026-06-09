@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { formatRupiah } from "@/lib/cashier/format-rupiah"
-import type { SalesTransaction } from "@/lib/sales/mock-data"
+import type { SalesTransaction } from "@/lib/sales/types"
 
 type TransactionTableProps = {
   rows: SalesTransaction[]

@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { BestSellingProduct } from "@/lib/sales/mock-data"
+import type { BestSellingProduct } from "@/lib/sales/types"
 import { formatSalesMetric } from "@/lib/sales/format"
 
 type BestSellingProductCardProps = {

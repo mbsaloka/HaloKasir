@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic"
 
-import type { ProfitRevenuePoint } from "@/lib/sales/mock-data"
+import type { ProfitRevenuePoint } from "@/lib/sales/types"
 
 const ChartSection = dynamic(
   () =>

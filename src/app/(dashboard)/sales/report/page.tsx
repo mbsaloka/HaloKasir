@@ -4,28 +4,25 @@ import { BestSellingCategoryCard } from "@/components/features/sales/report/best
 import { BestSellingProductCard } from "@/components/features/sales/report/best-selling-product-card"
 import { ChartSectionDynamic } from "@/components/features/sales/report/chart-section-dynamic"
 import { SalesOverviewSection } from "@/components/features/sales/report/sales-overview-section"
-import {
-  MOCK_BEST_CATEGORIES,
-  MOCK_BEST_PRODUCTS,
-  MOCK_OVERVIEW_METRICS,
-  MOCK_PROFIT_REVENUE_SERIES,
-} from "@/lib/sales/mock-data"
+import { getSalesReportData } from "@/lib/data/sales"
 
 export const metadata: Metadata = {
   title: "Laporan Penjualan",
 }
 
-export default function SalesReportPage() {
+export default async function SalesReportPage() {
+  const report = await getSalesReportData()
+
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-        <SalesOverviewSection metrics={MOCK_OVERVIEW_METRICS} />
-        <BestSellingCategoryCard categories={MOCK_BEST_CATEGORIES} />
+        <SalesOverviewSection metrics={report.metrics} />
+        <BestSellingCategoryCard categories={report.bestCategories} />
       </div>
 
-      <ChartSectionDynamic data={MOCK_PROFIT_REVENUE_SERIES} />
+      <ChartSectionDynamic data={report.series} />
 
-      <BestSellingProductCard products={MOCK_BEST_PRODUCTS} />
+      <BestSellingProductCard products={report.bestProducts} />
     </div>
   )
 }

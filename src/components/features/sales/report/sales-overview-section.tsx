@@ -8,7 +8,7 @@ import {
   CardAction,
 } from "@/components/ui/card"
 import { RevenueCard } from "@/components/features/sales/revenue-card"
-import type { OverviewMetric } from "@/lib/sales/mock-data"
+import type { OverviewMetric } from "@/lib/sales/types"
 
 type SalesOverviewSectionProps = {
   metrics: OverviewMetric[]

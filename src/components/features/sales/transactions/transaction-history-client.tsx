@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { SearchIcon } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
@@ -10,10 +10,9 @@ import {
 } from "@/components/features/sales/transactions/transaction-filters"
 import { TransactionList } from "@/components/features/sales/transactions/transaction-list"
 import {
-  MOCK_SALES_TRANSACTIONS,
-  MOCK_TRANSACTION_PAGE_SIZE,
+  TRANSACTION_PAGE_SIZE,
   type SalesTransaction,
-} from "@/lib/sales/mock-data"
+} from "@/lib/sales/types"
 import { parseTransactionAtDisplay } from "@/lib/sales/parse-transaction-date"
 
 function matchesQuickRange(d: Date, range: QuickRange, now: Date): boolean {
@@ -63,7 +62,13 @@ function filterRows(
   })
 }
 
-export function TransactionHistoryClient() {
+type TransactionHistoryClientProps = {
+  transactions: SalesTransaction[]
+}
+
+export function TransactionHistoryClient({
+  transactions,
+}: TransactionHistoryClientProps) {
   const [search, setSearch] = useState("")
   const [quickRange, setQuickRange] = useState<QuickRange>("all")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -71,16 +76,12 @@ export function TransactionHistoryClient() {
 
   const filtered = useMemo(
     () =>
-      filterRows(MOCK_SALES_TRANSACTIONS, search, quickRange, statusFilter),
-    [search, quickRange, statusFilter]
+      filterRows(transactions, search, quickRange, statusFilter),
+    [transactions, search, quickRange, statusFilter]
   )
 
-  const pageSize = MOCK_TRANSACTION_PAGE_SIZE
+  const pageSize = TRANSACTION_PAGE_SIZE
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
-
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages)
-  }, [page, totalPages])
 
   const safePage = Math.min(page, totalPages)
   const pageSlice = useMemo(() => {
