@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { MOCK_SUPPLIERS } from "@/lib/purchase/mock-data"
 
 export type IncomingFormValues = {
   supplier: string
@@ -23,10 +22,15 @@ export type IncomingFormValues = {
 type IncomingFormProps = {
   value: IncomingFormValues
   onChange: (next: IncomingFormValues) => void
+  suppliers: string[]
 }
 
 /** Form entri baris pembelian (Figma: grid Pemasok / Barcode / Produk / Harga / Qty / ED) */
-export function IncomingForm({ value, onChange }: IncomingFormProps) {
+export function IncomingForm({
+  value,
+  onChange,
+  suppliers,
+}: IncomingFormProps) {
   function patch(partial: Partial<IncomingFormValues>) {
     onChange({ ...value, ...partial })
   }
@@ -45,7 +49,7 @@ export function IncomingForm({ value, onChange }: IncomingFormProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {MOCK_SUPPLIERS.map((s) => (
+                {suppliers.map((s) => (
                   <SelectItem key={s} value={s}>
                     {s}
                   </SelectItem>

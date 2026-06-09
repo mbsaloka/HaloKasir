@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table"
 import { SupplierBadge } from "@/components/features/purchase/shared/supplier-badge"
 import { formatRupiah } from "@/lib/cashier/format-rupiah"
-import type { IncomingGoodsRecord } from "@/lib/purchase/mock-data"
+import type { IncomingGoodsRecord } from "@/lib/purchase/types"
 
 type PurchaseReportTableProps = {
   records: IncomingGoodsRecord[]

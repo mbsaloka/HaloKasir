@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge"
-import type { PurchaseIncomingStatus } from "@/lib/purchase/mock-data"
+import type { PurchaseIncomingStatus } from "@/lib/purchase/types"
 import { cn } from "@/lib/utils"
 
 const STYLE: Record<

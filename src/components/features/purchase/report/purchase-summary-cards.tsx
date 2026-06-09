@@ -8,7 +8,7 @@ import { formatRupiah } from "@/lib/cashier/format-rupiah"
 import {
   totalUnitsInRecords,
   type IncomingGoodsRecord,
-} from "@/lib/purchase/mock-data"
+} from "@/lib/purchase/types"
 import { cn } from "@/lib/utils"
 
 type Tone = "blue" | "slate" | "orange" | "violet" | "emerald"
@@ -32,7 +32,9 @@ export function PurchaseSummaryCards({ records }: PurchaseSummaryCardsProps) {
   const totalUnits = totalUnitsInRecords(records)
   const txCount = records.length
   const totalNominal = records.reduce((s, r) => s + r.grandTotal, 0)
-  const thisMonth = records.filter((r) => r.purchasedAt.startsWith("2024/02"))
+  const now = new Date()
+  const monthPrefix = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}`
+  const thisMonth = records.filter((r) => r.purchasedAt.startsWith(monthPrefix))
   const monthNominal = thisMonth.reduce((s, r) => s + r.grandTotal, 0)
   const uniqueSuppliers = new Set(records.map((r) => r.supplier)).size
   const avg = txCount > 0 ? Math.round(totalNominal / txCount) : 0
@@ -52,13 +54,16 @@ export function PurchaseSummaryCards({ records }: PurchaseSummaryCardsProps) {
     {
       title: "Total nilai pembelian",
       main: formatRupiah(totalNominal),
-      sub: "Semua periode data mock",
+      sub: "Semua periode",
       tone: "slate",
     },
     {
       title: "Pembelian bulan ini",
       main: formatRupiah(monthNominal),
-      sub: "Feb 2024 (mock)",
+      sub: new Intl.DateTimeFormat("id-ID", {
+        month: "long",
+        year: "numeric",
+      }).format(now),
       tone: "orange",
     },
     {

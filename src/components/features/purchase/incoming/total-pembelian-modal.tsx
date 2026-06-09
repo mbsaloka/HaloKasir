@@ -1,5 +1,7 @@
 "use client"
 
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -29,7 +31,7 @@ type TotalPembelianModalProps = {
     notes: string
     paymentMethod: string
     cashPaid: number
-  }) => void
+  }) => void | Promise<void>
 }
 
 function formatIdr(n: number) {
@@ -46,6 +48,7 @@ export function TotalPembelianModal({
   const [catatan, setCatatan] = useState("")
   const [metode, setMetode] = useState("Tunai")
   const [tunai, setTunai] = useState("")
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -60,14 +63,19 @@ export function TotalPembelianModal({
   const tunaiNum = Number(String(tunai).replace(/\D/g, "")) || 0
   const total = Math.max(0, subtotal - diskonNum)
 
-  function handleSimpan() {
-    onConfirm({
-      discount: diskonNum,
-      notes: catatan,
-      paymentMethod: metode,
-      cashPaid: tunaiNum,
-    })
-    onOpenChange(false)
+  async function handleSimpan() {
+    setIsSaving(true)
+    try {
+      await onConfirm({
+        discount: diskonNum,
+        notes: catatan,
+        paymentMethod: metode,
+        cashPaid: tunaiNum,
+      })
+      onOpenChange(false)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -135,8 +143,8 @@ export function TotalPembelianModal({
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Kembali
           </Button>
-          <Button type="button" onClick={handleSimpan}>
-            Simpan
+          <Button type="button" disabled={isSaving} onClick={handleSimpan}>
+            {isSaving ? "Menyimpan..." : "Simpan"}
           </Button>
         </DialogFooter>
       </DialogContent>

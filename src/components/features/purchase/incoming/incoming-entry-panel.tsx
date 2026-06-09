@@ -10,13 +10,10 @@ import {
 } from "@/components/features/purchase/incoming/incoming-form"
 import { IncomingLinesTable } from "@/components/features/purchase/incoming/incoming-lines-table"
 import { TotalPembelianModal } from "@/components/features/purchase/incoming/incoming-modal"
-import {
-  MOCK_PURCHASE_INVOICE_DRAFT,
-  MOCK_SUPPLIERS,
-  type PurchaseLine,
-} from "@/lib/purchase/mock-data"
+import type { PurchaseLine } from "@/lib/purchase/types"
 
 type IncomingEntryPanelProps = {
+  suppliers: string[]
   onCompletePurchase: (record: {
     lines: PurchaseLine[]
     supplier: string
@@ -24,20 +21,39 @@ type IncomingEntryPanelProps = {
     discount: number
     notes: string
     paymentMethod: string
-  }) => void
+    cashPaid: number
+  }) => Promise<void> | void
 }
 
-const emptyForm = (): IncomingFormValues => ({
-  supplier: MOCK_SUPPLIERS[0],
-  barcode: "",
-  nama: "",
-  harga: "",
-  qty: "",
-  expiry: "",
-})
+const fallbackSuppliers = ["Pemasok Umum"]
 
-export function IncomingEntryPanel({ onCompletePurchase }: IncomingEntryPanelProps) {
-  const [form, setForm] = useState<IncomingFormValues>(emptyForm)
+function invoiceDraft() {
+  const d = new Date()
+  const yy = String(d.getFullYear()).slice(-2)
+  const mm = String(d.getMonth() + 1).padStart(2, "0")
+  const dd = String(d.getDate()).padStart(2, "0")
+  return `PMB${yy}${mm}${dd}${String(Date.now()).slice(-6)}`
+}
+
+function emptyForm(suppliers: string[]): IncomingFormValues {
+  return {
+    supplier: suppliers[0] ?? fallbackSuppliers[0],
+    barcode: "",
+    nama: "",
+    harga: "",
+    qty: "",
+    expiry: "",
+  }
+}
+
+export function IncomingEntryPanel({
+  suppliers,
+  onCompletePurchase,
+}: IncomingEntryPanelProps) {
+  const supplierOptions = suppliers.length > 0 ? suppliers : fallbackSuppliers
+  const [form, setForm] = useState<IncomingFormValues>(() =>
+    emptyForm(supplierOptions)
+  )
   const [lines, setLines] = useState<PurchaseLine[]>([])
   const [totalModalOpen, setTotalModalOpen] = useState(false)
 
@@ -53,6 +69,7 @@ export function IncomingEntryPanel({ onCompletePurchase }: IncomingEntryPanelPro
     }).format(new Date())
   }, [])
 
+  const draftInvoiceNo = useMemo(() => invoiceDraft(), [])
   const runningTotal = lines.reduce((s, l) => s + l.unitPrice * l.qty, 0)
 
   function addLine() {
@@ -100,7 +117,7 @@ export function IncomingEntryPanel({ onCompletePurchase }: IncomingEntryPanelPro
 
   function handleBatal() {
     setLines([])
-    setForm(emptyForm())
+    setForm(emptyForm(supplierOptions))
   }
 
   return (
@@ -108,11 +125,15 @@ export function IncomingEntryPanel({ onCompletePurchase }: IncomingEntryPanelPro
       <div className="text-muted-foreground flex flex-col gap-1 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <span>{nowLabel}</span>
         <span className="font-medium text-foreground">
-          Faktur {MOCK_PURCHASE_INVOICE_DRAFT}
+          Faktur {draftInvoiceNo}
         </span>
       </div>
 
-      <IncomingForm value={form} onChange={setForm} />
+      <IncomingForm
+        value={form}
+        onChange={setForm}
+        suppliers={supplierOptions}
+      />
 
       <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
         <Button type="button" className="sm:ml-auto" onClick={addLine}>
@@ -153,14 +174,15 @@ export function IncomingEntryPanel({ onCompletePurchase }: IncomingEntryPanelPro
         open={totalModalOpen}
         onOpenChange={setTotalModalOpen}
         subtotal={runningTotal}
-        onConfirm={({ discount, notes, paymentMethod }) => {
-          onCompletePurchase({
+        onConfirm={async ({ discount, notes, paymentMethod, cashPaid }) => {
+          await onCompletePurchase({
             lines,
             supplier: form.supplier,
             grandTotal: Math.max(0, runningTotal - discount),
             discount,
             notes,
             paymentMethod,
+            cashPaid,
           })
           handleBatal()
         }}

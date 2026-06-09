@@ -5,7 +5,7 @@ import dynamic from "next/dynamic"
 import type {
   PurchaseTrendPoint,
   SupplierSpend,
-} from "@/lib/purchase/mock-data"
+} from "@/lib/purchase/types"
 
 const PurchaseChartsBlock = dynamic(
   () =>

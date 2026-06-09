@@ -22,7 +22,7 @@ import {
 import type {
   PurchaseTrendPoint,
   SupplierSpend,
-} from "@/lib/purchase/mock-data"
+} from "@/lib/purchase/types"
 
 const PRIMARY = "#1D8AD8"
 
@@ -99,7 +99,7 @@ export function PurchaseChartsBlock({
       <Card size="sm" className="shadow-xs">
         <CardHeader className="border-border border-b pb-3">
           <CardTitle className="text-sm font-medium">
-            Pembelian per pemasok (mock)
+            Pembelian per pemasok
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-4">

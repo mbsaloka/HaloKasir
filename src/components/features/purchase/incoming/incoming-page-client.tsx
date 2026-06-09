@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import Link from "next/link"
 
@@ -11,23 +12,24 @@ import { IncomingTable } from "@/components/features/purchase/incoming/incoming-
 import { PurchaseDetailDialog } from "@/components/features/purchase/shared/purchase-detail-dialog"
 import { PurchaseFilters } from "@/components/features/purchase/shared/purchase-filters"
 import {
-  MOCK_INCOMING_GOODS,
   PURCHASE_REPORT_PAGE_SIZE,
   filterIncomingRecords,
   type IncomingGoodsRecord,
   type PurchaseLine,
-} from "@/lib/purchase/mock-data"
+} from "@/lib/purchase/types"
+import { createPurchaseAction } from "@/lib/actions/purchase"
 
-function formatNowPurchase() {
-  const d = new Date()
-  const pad = (n: number) => String(n).padStart(2, "0")
-  return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+type IncomingPageClientProps = {
+  initialHistory: IncomingGoodsRecord[]
+  suppliers: string[]
 }
 
-export function IncomingPageClient() {
-  const [history, setHistory] = useState<IncomingGoodsRecord[]>(
-    MOCK_INCOMING_GOODS
-  )
+export function IncomingPageClient({
+  initialHistory,
+  suppliers,
+}: IncomingPageClientProps) {
+  const router = useRouter()
+  const [history, setHistory] = useState<IncomingGoodsRecord[]>(initialHistory)
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("Semua")
   const [page, setPage] = useState(1)
@@ -38,45 +40,25 @@ export function IncomingPageClient() {
     [history, status, search]
   )
 
-  useEffect(() => {
-    setPage(1)
-  }, [search, status])
-
   const totalPages = Math.max(1, Math.ceil(filtered.length / PURCHASE_REPORT_PAGE_SIZE))
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages)
-  }, [page, totalPages])
-
   const safePage = Math.min(page, totalPages)
   const slice = useMemo(() => {
     const start = (safePage - 1) * PURCHASE_REPORT_PAGE_SIZE
     return filtered.slice(start, start + PURCHASE_REPORT_PAGE_SIZE)
   }, [filtered, safePage])
 
-  function handleCompletePurchase(payload: {
+  async function handleCompletePurchase(payload: {
     lines: PurchaseLine[]
     supplier: string
     grandTotal: number
     discount: number
     notes: string
     paymentMethod: string
+    cashPaid: number
   }) {
-    void payload.discount
-    void payload.notes
-    void payload.paymentMethod
-    const record: IncomingGoodsRecord = {
-      id: `inc-${Date.now()}`,
-      invoiceNo: `PMB${String(Date.now()).slice(-10)}`,
-      supplier: payload.supplier,
-      purchasedAt: formatNowPurchase(),
-      status: "Received",
-      lines: payload.lines.map((l, i) => ({
-        ...l,
-        id: `${l.id}-saved-${i}`,
-      })),
-      grandTotal: payload.grandTotal,
-    }
-    setHistory((prev) => [record, ...prev])
+    const created = await createPurchaseAction(payload)
+    setHistory((prev) => [created, ...prev])
+    router.refresh()
   }
 
   return (
@@ -98,14 +80,26 @@ export function IncomingPageClient() {
         </TabsList>
 
         <TabsContent value="entri" className="mt-0">
-          <IncomingEntryPanel onCompletePurchase={handleCompletePurchase} />
+          <IncomingEntryPanel
+            suppliers={suppliers}
+            onCompletePurchase={handleCompletePurchase}
+          />
         </TabsContent>
 
         <TabsContent value="riwayat" className="mt-0 space-y-4">
           <PurchaseFilters
             search={search}
-            onSearchChange={setSearch}
-            statusFilter={{ value: status, onChange: setStatus }}
+            onSearchChange={(value) => {
+              setSearch(value)
+              setPage(1)
+            }}
+            statusFilter={{
+              value: status,
+              onChange: (value) => {
+                setStatus(value)
+                setPage(1)
+              },
+            }}
           />
           <IncomingTable records={slice} onViewDetail={setDetail} />
           <div className="text-muted-foreground flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">

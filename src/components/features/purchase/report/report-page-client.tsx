@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -10,24 +10,26 @@ import { PurchaseReportTable } from "@/components/features/purchase/report/purch
 import { PurchaseSummaryCards } from "@/components/features/purchase/report/purchase-summary-cards"
 import { ReportToolbar } from "@/components/features/purchase/report/report-toolbar"
 import {
-  MOCK_INCOMING_GOODS,
-  MOCK_PURCHASE_TREND,
-  MOCK_SUPPLIER_SPEND,
   PURCHASE_REPORT_PAGE_SIZE,
   filterReportRecords,
   incomingRecordsToReportRows,
   type IncomingGoodsRecord,
-} from "@/lib/purchase/mock-data"
+} from "@/lib/purchase/types"
+import type { PurchaseReportData } from "@/lib/data/purchase"
 
-export function ReportPageClient() {
+type ReportPageClientProps = {
+  report: PurchaseReportData
+}
+
+export function ReportPageClient({ report }: ReportPageClientProps) {
   const [search, setSearch] = useState("")
   const [period, setPeriod] = useState("Semua")
   const [page, setPage] = useState(1)
   const [detail, setDetail] = useState<IncomingGoodsRecord | null>(null)
 
   const sorted = useMemo(
-    () => incomingRecordsToReportRows(MOCK_INCOMING_GOODS),
-    []
+    () => incomingRecordsToReportRows(report.records),
+    [report.records]
   )
 
   const filtered = useMemo(
@@ -35,15 +37,7 @@ export function ReportPageClient() {
     [sorted, search, period]
   )
 
-  useEffect(() => {
-    setPage(1)
-  }, [search, period])
-
   const totalPages = Math.max(1, Math.ceil(filtered.length / PURCHASE_REPORT_PAGE_SIZE))
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages)
-  }, [page, totalPages])
-
   const safePage = Math.min(page, totalPages)
   const slice = useMemo(() => {
     const start = (safePage - 1) * PURCHASE_REPORT_PAGE_SIZE
@@ -55,16 +49,22 @@ export function ReportPageClient() {
       <PurchaseSummaryCards records={sorted} />
 
       <PurchaseChartsDynamic
-        trend={MOCK_PURCHASE_TREND}
-        supplierSpend={MOCK_SUPPLIER_SPEND}
+        trend={report.trend}
+        supplierSpend={report.supplierSpend}
       />
 
       <div className="space-y-4">
         <ReportToolbar
           search={search}
-          onSearchChange={setSearch}
+          onSearchChange={(value) => {
+            setSearch(value)
+            setPage(1)
+          }}
           period={period}
-          onPeriodChange={setPeriod}
+          onPeriodChange={(value) => {
+            setPeriod(value)
+            setPage(1)
+          }}
         />
         <PurchaseReportTable records={slice} onRowSelect={setDetail} />
         <div className="text-muted-foreground flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">

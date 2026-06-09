@@ -32,7 +32,7 @@ export function ReportToolbar({
             size="sm"
             className="border-border h-9 shadow-xs"
             onClick={() => {
-              /* mock kolom */
+
             }}
           >
             <ListIcon className="size-4" />
@@ -59,7 +59,7 @@ export function ReportToolbar({
             size="sm"
             className="border-border h-9 shadow-xs"
             onClick={() => {
-              /* mock unduh */
+
             }}
           >
             <DownloadIcon className="size-4" />

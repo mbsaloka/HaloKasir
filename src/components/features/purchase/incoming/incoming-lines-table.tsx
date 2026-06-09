@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { PurchaseLine } from "@/lib/purchase/mock-data"
+import type { PurchaseLine } from "@/lib/purchase/types"
 
 type IncomingLinesTableProps = {
   lines: PurchaseLine[]

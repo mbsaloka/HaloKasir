@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { formatRupiah } from "@/lib/cashier/format-rupiah"
-import type { IncomingGoodsRecord } from "@/lib/purchase/mock-data"
+import type { IncomingGoodsRecord } from "@/lib/purchase/types"
 
 type PurchaseDetailDialogProps = {
   open: boolean
