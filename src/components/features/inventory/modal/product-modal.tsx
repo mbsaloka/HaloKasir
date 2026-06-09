@@ -1,5 +1,7 @@
 "use client"
 
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import { useEffect, useId, useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -17,7 +19,7 @@ import {
   type ProductFieldErrors,
   type ProductFormState,
 } from "@/components/features/inventory/form/product-form"
-import type { InventoryProduct } from "@/lib/inventory/mock-data"
+import type { InventoryProduct } from "@/lib/inventory/types"
 
 export type ProductModalProps = {
   open: boolean
@@ -30,7 +32,7 @@ export type ProductModalProps = {
     values: ProductFormState
     numericPrice: number
     numericStock: number
-  }) => void
+  }) => void | Promise<void>
 }
 
 function validate(
@@ -65,6 +67,7 @@ export function ProductModal({
 
   const [form, setForm] = useState<ProductFormState>(emptyProductForm)
   const [errors, setErrors] = useState<ProductFieldErrors>({})
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -76,7 +79,7 @@ export function ProductModal({
     }
   }, [open, mode, product])
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const result = validate(form)
     if (!result.ok) {
@@ -87,14 +90,19 @@ export function ProductModal({
       String(form.price).replace(/\./g, "").replace(",", ".")
     )
     const numericStock = Number(String(form.stock).replace(/\D/g, ""))
-    onSave({
-      mode,
-      id: product?.id,
-      values: form,
-      numericPrice,
-      numericStock,
-    })
-    onOpenChange(false)
+    setIsSaving(true)
+    try {
+      await onSave({
+        mode,
+        id: product?.id,
+        values: form,
+        numericPrice,
+        numericStock,
+      })
+      onOpenChange(false)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const title =
@@ -127,7 +135,9 @@ export function ProductModal({
             >
               Batal
             </Button>
-            <Button type="submit">Simpan</Button>
+            <Button type="submit" disabled={isSaving}>
+              {isSaving ? "Menyimpan..." : "Simpan"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

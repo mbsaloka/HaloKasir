@@ -1,4 +1,4 @@
-import type { InventoryProduct } from "@/lib/inventory/mock-data"
+import type { InventoryProduct } from "@/lib/inventory/types"
 
 export type StockLevel = "in_stock" | "low_stock" | "out_of_stock"
 

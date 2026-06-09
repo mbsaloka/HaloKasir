@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
 import {
@@ -20,24 +21,24 @@ import { ProductModal } from "@/components/features/inventory/modal/product-moda
 import { InventoryTable } from "@/components/features/inventory/table/inventory-table"
 import {
   INVENTORY_PAGE_SIZE,
-  MOCK_INVENTORY_PRODUCTS,
-  PLACEHOLDER_INVENTORY_IMAGE,
   filterInventoryProducts,
   type InventoryProduct,
-} from "@/lib/inventory/mock-data"
+} from "@/lib/inventory/types"
+import {
+  createInventoryProductAction,
+  deleteInventoryProductAction,
+  updateInventoryProductAction,
+} from "@/lib/actions/inventory"
 
-function randomDigits(len: number) {
-  let s = ""
-  for (let i = 0; i < len; i += 1) {
-    s += String(Math.floor(Math.random() * 10))
-  }
-  return s
+type InventoryPageClientProps = {
+  initialProducts: InventoryProduct[]
 }
 
-export function InventoryPageClient() {
-  const [products, setProducts] = useState<InventoryProduct[]>(
-    MOCK_INVENTORY_PRODUCTS
-  )
+export function InventoryPageClient({
+  initialProducts,
+}: InventoryPageClientProps) {
+  const router = useRouter()
+  const [products, setProducts] = useState<InventoryProduct[]>(initialProducts)
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("Semua")
   const [page, setPage] = useState(1)
@@ -55,16 +56,7 @@ export function InventoryPageClient() {
     [products, search, category]
   )
 
-  useEffect(() => {
-    setPage(1)
-  }, [search, category])
-
   const totalPages = Math.max(1, Math.ceil(filtered.length / INVENTORY_PAGE_SIZE))
-
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages)
-  }, [page, totalPages])
-
   const safePage = Math.min(page, totalPages)
   const pageSlice = useMemo(() => {
     const start = (safePage - 1) * INVENTORY_PAGE_SIZE
@@ -89,9 +81,15 @@ export function InventoryPageClient() {
 
       <InventoryToolbar
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={(value) => {
+          setSearch(value)
+          setPage(1)
+        }}
         category={category}
-        onCategoryChange={setCategory}
+        onCategoryChange={(value) => {
+          setCategory(value)
+          setPage(1)
+        }}
         onAddClick={openCreate}
       />
 
@@ -103,7 +101,7 @@ export function InventoryPageClient() {
 
       <div className="text-muted-foreground flex flex-col items-stretch justify-between gap-3 text-sm sm:flex-row sm:items-center">
         <p className="tabular-nums">
-          Halaman {safePage} dari {totalPages} ·{" "}
+          Halaman {safePage} dari {totalPages} -{" "}
           {filtered.length.toLocaleString("id-ID")} baris
         </p>
         <div className="flex items-center justify-end gap-2">
@@ -137,37 +135,29 @@ export function InventoryPageClient() {
         onOpenChange={setModalOpen}
         mode={modalMode}
         product={editingProduct}
-        onSave={({ mode: m, id, values, numericPrice, numericStock }) => {
+        onSave={async ({ mode: m, id, values, numericPrice, numericStock }) => {
           if (m === "create") {
-            const newProduct: InventoryProduct = {
-              id: `inv-${Date.now()}`,
-              stockId: randomDigits(6),
-              itemId: randomDigits(7),
+            const created = await createInventoryProductAction({
               name: values.name.trim(),
               price: numericPrice,
               stock: numericStock,
               category: values.category,
-              imageSrc: PLACEHOLDER_INVENTORY_IMAGE,
-              reorderLevel: 10,
-              isActive: true,
-            }
-            setProducts((prev) => [...prev, newProduct])
+            })
+            setProducts((prev) => [...prev, created])
+            router.refresh()
             return
           }
+
           if (!id) return
-          setProducts((prev) =>
-            prev.map((p) =>
-              p.id === id
-                ? {
-                    ...p,
-                    name: values.name.trim(),
-                    price: numericPrice,
-                    stock: numericStock,
-                    category: values.category,
-                  }
-                : p
-            )
-          )
+          const updated = await updateInventoryProductAction({
+            id,
+            name: values.name.trim(),
+            price: numericPrice,
+            stock: numericStock,
+            category: values.category,
+          })
+          setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)))
+          router.refresh()
         }}
       />
 
@@ -182,7 +172,7 @@ export function InventoryPageClient() {
             <AlertDialogTitle>Hapus barang?</AlertDialogTitle>
             <AlertDialogDescription>
               {pendingDelete
-                ? `“${pendingDelete.name}” akan dihapus dari daftar (mock).`
+                ? `"${pendingDelete.name}" akan dihapus dari database.`
                 : null}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -190,12 +180,14 @@ export function InventoryPageClient() {
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              onClick={() => {
+              onClick={async () => {
                 if (!pendingDelete) return
+                await deleteInventoryProductAction(pendingDelete.id)
                 setProducts((prev) =>
                   prev.filter((p) => p.id !== pendingDelete.id)
                 )
                 setPendingDelete(null)
+                router.refresh()
               }}
             >
               Hapus

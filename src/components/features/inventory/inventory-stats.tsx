@@ -4,7 +4,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import type { InventoryProduct } from "@/lib/inventory/mock-data"
+import type { InventoryProduct } from "@/lib/inventory/types"
 import { cn } from "@/lib/utils"
 
 type StatTone = "blue" | "orange" | "red" | "green" | "purple"

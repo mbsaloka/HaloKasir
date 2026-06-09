@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ProductTableRow } from "@/components/features/inventory/table/product-table-row"
-import type { InventoryProduct } from "@/lib/inventory/mock-data"
+import type { InventoryProduct } from "@/lib/inventory/types"
 
 type InventoryTableProps = {
   products: InventoryProduct[]

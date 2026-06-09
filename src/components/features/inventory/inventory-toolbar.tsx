@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { INVENTORY_CATEGORIES } from "@/lib/inventory/mock-data"
+import { INVENTORY_CATEGORIES } from "@/lib/inventory/types"
 
 type InventoryToolbarProps = {
   search: string
@@ -42,7 +42,7 @@ export function InventoryToolbar({
             size="sm"
             className="border-border h-9 shadow-xs"
             onClick={() => {
-              /* mock kolom */
+
             }}
           >
             <ListIcon className="size-4" />
@@ -89,7 +89,7 @@ export function InventoryToolbar({
             size="sm"
             className="border-border h-9 shadow-xs"
             onClick={() => {
-              /* mock unduh */
+
             }}
           >
             <DownloadIcon className="size-4" />

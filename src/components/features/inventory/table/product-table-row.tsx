@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { StockBadge } from "@/components/features/inventory/stock-badge"
 import { formatRupiah } from "@/lib/cashier/format-rupiah"
-import type { InventoryProduct } from "@/lib/inventory/mock-data"
+import type { InventoryProduct } from "@/lib/inventory/types"
 import { getStockLevel } from "@/lib/inventory/stock-status"
 
 type ProductTableRowProps = {

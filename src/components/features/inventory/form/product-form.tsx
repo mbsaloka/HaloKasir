@@ -3,7 +3,6 @@
 import { useRef } from "react"
 import { ImagePlusIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -13,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { INVENTORY_CATEGORIES } from "@/lib/inventory/mock-data"
+import { INVENTORY_CATEGORIES } from "@/lib/inventory/types"
 import { cn } from "@/lib/utils"
 
 export type ProductFormState = {
@@ -163,7 +162,7 @@ export function ProductForm({
           >
             <ImagePlusIcon className="text-muted-foreground size-8" />
             <span className="text-muted-foreground text-sm">
-              Unggah gambar (mock)
+              Pilih gambar
             </span>
             {value.imageLabel ? (
               <span className="text-foreground text-xs font-medium break-all">
