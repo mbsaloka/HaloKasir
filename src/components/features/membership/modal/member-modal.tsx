@@ -20,7 +20,7 @@ import {
   memberToFormState,
   type Member,
   type MemberFormState,
-} from "@/lib/membership/mock-data"
+} from "@/lib/membership/types"
 
 export type MemberModalProps = {
   open: boolean
@@ -32,7 +32,7 @@ export type MemberModalProps = {
     id?: string
     values: MemberFormState
     pointsNumeric: number
-  }) => void
+  }) => void | Promise<void>
 }
 
 function validate(
@@ -71,8 +71,9 @@ export function MemberModal({
     mode === "edit" && member ? memberToFormState(member) : emptyMemberForm()
   )
   const [errors, setErrors] = useState<MemberFieldErrors>({})
+  const [isSaving, setIsSaving] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const result = validate(form)
     if (!result.ok) {
@@ -81,13 +82,18 @@ export function MemberModal({
     }
     const rawPoints = String(form.points).replace(/\D/g, "")
     const pointsNumeric = Number(rawPoints)
-    onSave({
-      mode,
-      id: member?.id,
-      values: form,
-      pointsNumeric,
-    })
-    onOpenChange(false)
+    setIsSaving(true)
+    try {
+      await onSave({
+        mode,
+        id: member?.id,
+        values: form,
+        pointsNumeric,
+      })
+      onOpenChange(false)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const title =
@@ -95,7 +101,7 @@ export function MemberModal({
   const description =
     mode === "create"
       ? "Lengkapi data pelanggan untuk mendaftarkan keanggotaan."
-      : "Perbarui informasi anggota. Perubahan disimpan secara lokal (mock)."
+      : "Perbarui informasi anggota di database."
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -125,8 +131,16 @@ export function MemberModal({
             >
               Batal
             </Button>
-            <Button type="submit" className="min-w-[120px] bg-[#157CBD] hover:bg-[#126BA8]">
-              {mode === "create" ? "Simpan" : "Perbarui"}
+            <Button
+              type="submit"
+              disabled={isSaving}
+              className="min-w-[120px] bg-[#157CBD] hover:bg-[#126BA8]"
+            >
+              {isSaving
+                ? "Menyimpan..."
+                : mode === "create"
+                  ? "Simpan"
+                  : "Perbarui"}
             </Button>
           </DialogFooter>
         </form>

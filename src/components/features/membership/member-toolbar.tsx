@@ -15,7 +15,7 @@ import {
   MEMBERSHIP_TIER_LABELS,
   type MemberTierFilter,
   type MembershipTier,
-} from "@/lib/membership/mock-data"
+} from "@/lib/membership/types"
 
 export type MemberToolbarProps = {
   search: string

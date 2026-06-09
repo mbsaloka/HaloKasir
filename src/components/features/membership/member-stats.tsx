@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import type { Member } from "@/lib/membership/mock-data"
+import type { Member } from "@/lib/membership/types"
 
 export function MemberStats({ members }: { members: Member[] }) {
   const active = members.filter((m) => m.status === "active").length
@@ -31,7 +31,7 @@ export function MemberStats({ members }: { members: Member[] }) {
       title: "Total poin",
       value: totalPoints.toLocaleString("id-ID"),
       icon: AwardIcon,
-      hint: "Akumulasi mock",
+      hint: "Akumulasi poin",
     },
   ]
 

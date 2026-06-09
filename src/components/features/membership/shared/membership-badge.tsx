@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 import {
   MEMBERSHIP_TIER_LABELS,
   type MembershipTier,
-} from "@/lib/membership/mock-data"
+} from "@/lib/membership/types"
 
 const tierStyles: Record<MembershipTier, string> = {
   regular:

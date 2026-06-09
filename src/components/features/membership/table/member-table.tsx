@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { Member } from "@/lib/membership/mock-data"
+import type { Member } from "@/lib/membership/types"
 
 export type MemberTableProps = {
   members: Member[]

@@ -10,7 +10,7 @@ import { TableCell, TableRow } from "@/components/ui/table"
 import {
   MEMBER_STATUS_LABELS,
   type Member,
-} from "@/lib/membership/mock-data"
+} from "@/lib/membership/types"
 
 export type MemberTableRowProps = {
   member: Member

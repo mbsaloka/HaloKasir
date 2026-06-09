@@ -20,7 +20,7 @@ import {
   type MemberFormState,
   type MemberStatus,
   type MembershipTier,
-} from "@/lib/membership/mock-data"
+} from "@/lib/membership/types"
 
 export type MemberFieldErrors = Partial<
   Record<keyof MemberFormState | "points", string>

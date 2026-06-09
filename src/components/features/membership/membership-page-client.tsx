@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 
 import { MemberModal } from "@/components/features/membership/modal/member-modal"
 import { MemberStats } from "@/components/features/membership/member-stats"
@@ -24,37 +25,25 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  MOCK_MEMBERS,
   filterMembers,
   type Member,
-  type MemberFormState,
   type MemberTierFilter,
-} from "@/lib/membership/mock-data"
+} from "@/lib/membership/types"
+import {
+  createMemberAction,
+  deleteMemberAction,
+  updateMemberAction,
+} from "@/lib/actions/membership"
 
-function newMemberId() {
-  return `m-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+type MembershipPageClientProps = {
+  initialMembers: Member[]
 }
 
-function formToMember(
-  id: string,
-  values: MemberFormState,
-  pointsNumeric: number
-): Member {
-  return {
-    id,
-    name: values.name.trim(),
-    phone: values.phone.trim(),
-    email: values.email.trim(),
-    tier: values.tier,
-    points: pointsNumeric,
-    status: values.status,
-    address: values.address.trim() || undefined,
-    avatarUrl: null,
-  }
-}
-
-export function MembershipPageClient() {
-  const [members, setMembers] = useState<Member[]>(MOCK_MEMBERS)
+export function MembershipPageClient({
+  initialMembers,
+}: MembershipPageClientProps) {
+  const router = useRouter()
+  const [members, setMembers] = useState<Member[]>(initialMembers)
   const [search, setSearch] = useState("")
   const [tier, setTier] = useState<MemberTierFilter>("all")
 
@@ -90,7 +79,7 @@ export function MembershipPageClient() {
           Keanggotaan
         </h1>
         <p className="text-muted-foreground mt-1 text-sm">
-          Kelola pelanggan, tingkat keanggotaan, dan poin loyalitas (data mock).
+          Kelola pelanggan, tingkat keanggotaan, dan poin loyalitas.
         </p>
       </div>
 
@@ -126,17 +115,37 @@ export function MembershipPageClient() {
         onOpenChange={setModalOpen}
         mode={modalMode}
         member={editingMember}
-        onSave={({ mode, id, values, pointsNumeric }) => {
+        onSave={async ({ mode, id, values, pointsNumeric }) => {
           if (mode === "create") {
-            const created = formToMember(newMemberId(), values, pointsNumeric)
+            const created = await createMemberAction({
+              name: values.name.trim(),
+              phone: values.phone.trim(),
+              email: values.email.trim(),
+              tier: values.tier,
+              points: pointsNumeric,
+              status: values.status,
+              address: values.address.trim() || undefined,
+            })
             setMembers((prev) => [created, ...prev])
+            router.refresh()
             return
           }
+
           if (!id) return
-          const updated = formToMember(id, values, pointsNumeric)
+          const updated = await updateMemberAction({
+            id,
+            name: values.name.trim(),
+            phone: values.phone.trim(),
+            email: values.email.trim(),
+            tier: values.tier,
+            points: pointsNumeric,
+            status: values.status,
+            address: values.address.trim() || undefined,
+          })
           setMembers((prev) =>
-            prev.map((m) => (m.id === id ? { ...m, ...updated } : m))
+            prev.map((member) => (member.id === id ? updated : member))
           )
+          router.refresh()
         }}
       />
 
@@ -151,7 +160,7 @@ export function MembershipPageClient() {
             <AlertDialogTitle>Hapus anggota?</AlertDialogTitle>
             <AlertDialogDescription>
               {pendingDelete
-                ? `Anggota "${pendingDelete.name}" akan dihapus dari daftar mock. Tindakan ini hanya di antarmuka.`
+                ? `Anggota "${pendingDelete.name}" akan dihapus dari database.`
                 : null}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -159,12 +168,14 @@ export function MembershipPageClient() {
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              onClick={() => {
+              onClick={async () => {
                 if (!pendingDelete) return
+                await deleteMemberAction(pendingDelete.id)
                 setMembers((prev) =>
                   prev.filter((m) => m.id !== pendingDelete.id)
                 )
                 setPendingDelete(null)
+                router.refresh()
               }}
             >
               Hapus
