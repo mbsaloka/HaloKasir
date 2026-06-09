@@ -14,14 +14,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { clearMockSessionCookie } from "@/lib/auth/client"
-import { MOCK_USER_NAME } from "@/lib/dashboard/mock-data"
+import { authClient } from "@/lib/auth/client"
 
-export function ProfileMenu() {
+type ProfileMenuProps = {
+  user: {
+    name: string
+    email: string
+  }
+}
+
+export function ProfileMenu({ user }: ProfileMenuProps) {
   const router = useRouter()
 
-  function handleLogout() {
-    clearMockSessionCookie()
+  async function handleLogout() {
+    await authClient.signOut()
     router.refresh()
     router.push("/login")
   }
@@ -33,9 +39,9 @@ export function ProfileMenu() {
           variant="ghost"
           className="hover:bg-muted/80 h-auto gap-2 rounded-lg px-2 py-1.5"
         >
-          <BoringUserAvatar name={MOCK_USER_NAME} size={32} />
+          <BoringUserAvatar name={user.name} size={32} />
           <span className="text-primary hidden text-sm font-semibold sm:inline">
-            {MOCK_USER_NAME}
+            {user.name}
           </span>
           <ChevronDownIcon className="text-muted-foreground size-4" />
         </Button>
@@ -44,9 +50,9 @@ export function ProfileMenu() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col gap-0.5">
             <span className="text-primary text-sm font-semibold">
-              {MOCK_USER_NAME}
+              {user.name}
             </span>
-            <span className="text-muted-foreground text-xs">admin@mock.local</span>
+            <span className="text-muted-foreground text-xs">{user.email}</span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

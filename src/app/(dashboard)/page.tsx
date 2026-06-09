@@ -1,5 +1,8 @@
 import { DashboardHome } from "@/components/features/dashboard/dashboard-home"
+import { getDashboardSummary } from "@/lib/data/dashboard"
 
-export default function BerandaPage() {
-  return <DashboardHome />
+export default async function BerandaPage() {
+  const summary = await getDashboardSummary()
+
+  return <DashboardHome summary={summary} />
 }

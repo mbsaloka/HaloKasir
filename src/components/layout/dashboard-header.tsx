@@ -3,15 +3,18 @@
 import { BellIcon, MenuIcon, PanelLeftCloseIcon } from "lucide-react"
 
 import { AppBreadcrumb } from "@/components/layout/app-breadcrumb"
-import { DashboardInlineNav } from "@/components/layout/dashboard-inline-nav"
 import { ProfileMenu } from "@/components/layout/profile-menu"
 import { Button } from "@/components/ui/button"
 
 type DashboardHeaderProps = {
   onMenuToggle: () => void
+  user: {
+    name: string
+    email: string
+  }
 }
 
-export function DashboardHeader({ onMenuToggle }: DashboardHeaderProps) {
+export function DashboardHeader({ onMenuToggle, user }: DashboardHeaderProps) {
   return (
     <header className="bg-background flex shrink-0 flex-col border-b border-border">
       <div className="flex h-14 items-center justify-between gap-3 px-4">
@@ -48,7 +51,7 @@ export function DashboardHeader({ onMenuToggle }: DashboardHeaderProps) {
           >
             <BellIcon className="size-5" />
           </Button>
-          <ProfileMenu />
+          <ProfileMenu user={user} />
         </div>
       </div>
       {/* <DashboardInlineNav /> */}

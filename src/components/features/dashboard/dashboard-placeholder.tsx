@@ -5,7 +5,7 @@ type DashboardPlaceholderProps = {
 
 export function DashboardPlaceholder({
   title,
-  description = "Halaman ini menggunakan data mock; konten akan ditambahkan.",
+  description = "Konten halaman ini akan ditambahkan.",
 }: DashboardPlaceholderProps) {
   return (
     <div className="border-border bg-card text-card-foreground mx-auto max-w-3xl rounded-xl border p-10 text-center shadow-xs">

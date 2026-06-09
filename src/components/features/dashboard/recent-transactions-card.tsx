@@ -8,9 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { MOCK_RECENT_TRANSACTIONS } from "@/lib/dashboard/mock-data"
+import type { TransactionRow } from "@/lib/dashboard/types"
 
-export function RecentTransactionsCard() {
+type RecentTransactionsCardProps = {
+  transactions: TransactionRow[]
+}
+
+export function RecentTransactionsCard({
+  transactions,
+}: RecentTransactionsCardProps) {
   return (
     <Card className="flex h-full flex-col shadow-sm lg:min-h-[520px]">
       <CardHeader className="pb-2">
@@ -19,7 +25,7 @@ export function RecentTransactionsCard() {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-3">
-        {MOCK_RECENT_TRANSACTIONS.map((tx, i) => (
+        {transactions.map((tx, i) => (
           <div
             key={`${tx.memberId}-${i}`}
             className="border-border bg-card rounded-lg border px-4 py-3 shadow-xs"
@@ -36,6 +42,11 @@ export function RecentTransactionsCard() {
             </div>
           </div>
         ))}
+        {transactions.length === 0 ? (
+          <p className="text-muted-foreground py-12 text-center text-sm">
+            Belum ada transaksi.
+          </p>
+        ) : null}
       </CardContent>
       <CardFooter className="mt-auto justify-end border-t pt-4 pb-6">
         <Button

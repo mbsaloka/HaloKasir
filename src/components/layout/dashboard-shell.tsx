@@ -6,7 +6,15 @@ import { DashboardHeader } from "@/components/layout/dashboard-header"
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
 import { cn } from "@/lib/utils"
 
-export function DashboardShell({ children }: { children: ReactNode }) {
+type DashboardShellProps = {
+  children: ReactNode
+  user: {
+    name: string
+    email: string
+  }
+}
+
+export function DashboardShell({ children, user }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
@@ -35,7 +43,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       )}
 
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
-        <DashboardHeader onMenuToggle={() => setMobileOpen((o) => !o)} />
+        <DashboardHeader
+          user={user}
+          onMenuToggle={() => setMobileOpen((o) => !o)}
+        />
         <main
           className={cn(
             "flex-1 overflow-auto px-4 py-6 md:px-6 lg:px-8",

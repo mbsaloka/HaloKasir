@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
+import { requireCurrentUser } from "@/lib/data/session"
 
 export const metadata: Metadata = {
   title: {
@@ -9,10 +10,23 @@ export const metadata: Metadata = {
   },
 }
 
-export default function DashboardRouteLayout({
+export const dynamic = "force-dynamic"
+
+export default async function DashboardRouteLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return <DashboardLayout>{children}</DashboardLayout>
+  const user = await requireCurrentUser()
+
+  return (
+    <DashboardLayout
+      user={{
+        name: user.name,
+        email: user.email,
+      }}
+    >
+      {children}
+    </DashboardLayout>
+  )
 }

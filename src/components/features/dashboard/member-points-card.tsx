@@ -18,9 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { MOCK_TOP_MEMBERS } from "@/lib/dashboard/mock-data"
+import type { MemberRow } from "@/lib/dashboard/types"
 
-export function MemberPointsCard() {
+type MemberPointsCardProps = {
+  members: MemberRow[]
+}
+
+export function MemberPointsCard({ members }: MemberPointsCardProps) {
   return (
     <Card className="shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -42,7 +46,7 @@ export function MemberPointsCard() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {MOCK_TOP_MEMBERS.map((m) => (
+            {members.map((m) => (
               <TableRow key={m.id}>
                 <TableCell className="pl-6">
                   <div className="flex items-center gap-3">
@@ -58,6 +62,16 @@ export function MemberPointsCard() {
                 </TableCell>
               </TableRow>
             ))}
+            {members.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={2}
+                  className="text-muted-foreground px-6 py-8 text-center"
+                >
+                  Belum ada anggota.
+                </TableCell>
+              </TableRow>
+            ) : null}
           </TableBody>
         </Table>
       </CardContent>
