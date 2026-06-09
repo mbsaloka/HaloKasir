@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Halo Kasir
 
-## Getting Started
+Halo Kasir is a Next.js 16 App Router POS/CRM app backed by Neon Postgres, Drizzle ORM, and Better Auth.
 
-First, run the development server:
+## Environment
+
+Copy `.env.example` to `.env.local` and fill in your Neon connection string:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+DATABASE_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DB?sslmode=require"
+BETTER_AUTH_SECRET="replace-with-a-long-random-secret"
+BETTER_AUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Database
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Generate and apply schema changes:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
 
-## Learn More
+For development, you can also push the schema directly:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm db:push
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Seed the database with users, products, members, purchases, sales transactions, charts, and account history:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm db:seed
+```
 
-## Deploy on Vercel
+Seeded login:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```text
+admin@halokasir.local
+password1234
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Development
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
