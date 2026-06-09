@@ -1,7 +1,5 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
-
-import { AUTH_COOKIE_NAME } from "@/lib/auth/constants"
+import { getSessionCookie } from "better-auth/cookies"
+import { NextResponse, type NextRequest } from "next/server"
 
 const STATIC_EXT = /\.(?:svg|ico|png|jpg|jpeg|gif|webp|woff2?)$/i
 
@@ -18,14 +16,14 @@ function isAuthPath(pathname: string) {
   return pathname === "/login" || pathname === "/register"
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   if (isStaticAsset(pathname)) {
     return NextResponse.next()
   }
 
-  const hasSession = Boolean(request.cookies.get(AUTH_COOKIE_NAME)?.value)
+  const hasSession = Boolean(getSessionCookie(request))
 
   if (isAuthPath(pathname)) {
     if (hasSession) {
@@ -44,8 +42,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image).*)",
-    "/",
-  ],
+  matcher: ["/((?!_next/static|_next/image).*)", "/"],
 }

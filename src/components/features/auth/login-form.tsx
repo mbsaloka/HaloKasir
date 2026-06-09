@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { getSafeCallbackUrl } from "@/lib/auth/callback-url"
-import { setMockSessionCookie } from "@/lib/auth/client"
+import { authClient } from "@/lib/auth/client"
 import { loginSchema, type LoginFormValues } from "@/lib/validations/auth"
 
 export function LoginForm() {
@@ -31,71 +31,84 @@ export function LoginForm() {
   })
 
   async function onSubmit(values: LoginFormValues) {
-    await new Promise((r) => setTimeout(r, 450))
-    console.info("[mock login]", values)
-    setMockSessionCookie()
-    form.reset({ email: "", password: "" })
     const next = getSafeCallbackUrl(searchParams.get("callbackUrl"))
+    const result = await authClient.signIn.email({
+      email: values.email,
+      password: values.password,
+      callbackURL: next,
+    })
+
+    if (result.error) {
+      form.setError("root", {
+        message: result.error.message ?? "Email atau kata sandi tidak valid.",
+      })
+      return
+    }
+
+    form.reset({ email: "", password: "" })
     router.refresh()
     router.push(next)
   }
 
   return (
-    <>
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-5"
-          noValidate
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-5"
+        noValidate
+      >
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email Address</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  autoComplete="email"
+                  placeholder="example@email.com"
+                  className="h-11"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="********"
+                  className="h-11"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button
+          type="submit"
+          className="h-11 w-full text-base"
+          size="lg"
+          disabled={form.formState.isSubmitting}
         >
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email Address</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    autoComplete="email"
-                    placeholder="example@email.com"
-                    className="h-11"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    autoComplete="current-password"
-                    placeholder="••••••••"
-                    className="h-11"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button
-            type="submit"
-            className="h-11 w-full text-base"
-            size="lg"
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? "Memproses…" : "Masuk"}
-          </Button>
-        </form>
-      </Form>
-    </>
+          {form.formState.isSubmitting ? "Memproses..." : "Masuk"}
+        </Button>
+        {form.formState.errors.root?.message ? (
+          <p className="text-destructive text-center text-sm">
+            {form.formState.errors.root.message}
+          </p>
+        ) : null}
+      </form>
+    </Form>
   )
 }
