@@ -9,7 +9,7 @@ import {
 import { ProfileField } from "@/components/features/profile/shared/profile-field"
 import { ProfileBadge } from "@/components/features/profile/shared/profile-badge"
 import { ProfileHeader } from "@/components/features/profile/profile-header"
-import type { UserProfile } from "@/lib/profile/mock-data"
+import type { UserProfile } from "@/lib/profile/types"
 
 type ProfileInfoCardProps = {
   profile: UserProfile

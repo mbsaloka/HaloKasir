@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ProfileActions } from "@/components/features/profile/profile-actions"
-import type { UserProfile } from "@/lib/profile/mock-data"
+import type { UserProfile } from "@/lib/profile/types"
 
 function initials(name: string) {
   return name

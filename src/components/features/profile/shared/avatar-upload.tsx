@@ -24,7 +24,7 @@ function initials(name: string) {
     .join("")
 }
 
-/** Unggah avatar mock — pratinjau lokal, tidak mengunggah ke server */
+/** Pratinjau avatar lokal. */
 export function AvatarUpload({
   imageSrc,
   fallbackLabel,
@@ -79,7 +79,7 @@ export function AvatarUpload({
         </p>
       ) : (
         <p className="text-muted-foreground text-center text-xs">
-          Pratinjau lokal (mock)
+          Pratinjau lokal
         </p>
       )}
     </div>

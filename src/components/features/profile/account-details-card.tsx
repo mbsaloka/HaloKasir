@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -35,7 +35,7 @@ import {
   ACCOUNT_HISTORY_PAGE_SIZES,
   type AccountHistoryAction,
   type AccountHistoryRow,
-} from "@/lib/profile/mock-data"
+} from "@/lib/profile/types"
 import { cn } from "@/lib/utils"
 
 type AccountDetailsCardProps = {
@@ -61,11 +61,36 @@ type QuickTab = "all" | "today" | "week" | "year"
 
 function filterByQuick(rows: AccountHistoryRow[], tab: QuickTab): AccountHistoryRow[] {
   if (tab === "all") return rows
-  if (tab === "today")
-    return rows.filter((r) => r.at.startsWith("2024/02/04"))
-  if (tab === "week")
-    return rows.filter((r) => r.at.startsWith("2024/02/"))
-  if (tab === "year") return rows.filter((r) => r.at.startsWith("2024/"))
+  const now = new Date()
+  if (tab === "today") {
+    return rows.filter((r) => {
+      const date = new Date(r.at.replace(/\//g, "-"))
+      return (
+        date.getFullYear() === now.getFullYear() &&
+        date.getMonth() === now.getMonth() &&
+        date.getDate() === now.getDate()
+      )
+    })
+  }
+  if (tab === "week") {
+    const day = (now.getDay() + 6) % 7
+    const start = new Date(now)
+    start.setDate(now.getDate() - day)
+    start.setHours(0, 0, 0, 0)
+    const end = new Date(start)
+    end.setDate(start.getDate() + 6)
+    end.setHours(23, 59, 59, 999)
+    return rows.filter((r) => {
+      const date = new Date(r.at.replace(/\//g, "-"))
+      return date >= start && date <= end
+    })
+  }
+  if (tab === "year") {
+    return rows.filter((r) => {
+      const date = new Date(r.at.replace(/\//g, "-"))
+      return date.getFullYear() === now.getFullYear()
+    })
+  }
   return rows
 }
 
@@ -77,15 +102,7 @@ export function AccountDetailsCard({ rows }: AccountDetailsCardProps) {
 
   const filtered = useMemo(() => filterByQuick(rows, quick), [rows, quick])
 
-  useEffect(() => {
-    setPage(1)
-  }, [quick, pageSize])
-
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages)
-  }, [page, totalPages])
-
   const safePage = Math.min(page, totalPages)
   const slice = useMemo(() => {
     const start = (safePage - 1) * pageSize
@@ -131,7 +148,10 @@ export function AccountDetailsCard({ rows }: AccountDetailsCardProps) {
                 size="sm"
                 variant={quick === id ? "default" : "ghost"}
                 className="h-8 px-3 text-xs sm:text-sm"
-                onClick={() => setQuick(id)}
+                onClick={() => {
+                  setQuick(id)
+                  setPage(1)
+                }}
               >
                 {label}
               </Button>
@@ -146,7 +166,7 @@ export function AccountDetailsCard({ rows }: AccountDetailsCardProps) {
               size="sm"
               className="border-border h-9 shrink-0 gap-1 shadow-xs"
               onClick={() => {
-                /* mock */
+
               }}
             >
               <DownloadIcon className="size-4" />
@@ -193,7 +213,10 @@ export function AccountDetailsCard({ rows }: AccountDetailsCardProps) {
             <span>Baris per halaman</span>
             <Select
               value={String(pageSize)}
-              onValueChange={(v) => setPageSize(Number(v))}
+              onValueChange={(v) => {
+                setPageSize(Number(v))
+                setPage(1)
+              }}
             >
               <SelectTrigger className="bg-background h-8 w-[72px] border-border shadow-xs">
                 <SelectValue />

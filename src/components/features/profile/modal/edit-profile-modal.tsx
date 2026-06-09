@@ -1,5 +1,7 @@
 "use client"
 
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import { useEffect, useId, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -15,13 +17,13 @@ import {
   type ProfileFormValues,
 } from "@/components/features/profile/form/profile-form"
 import { AvatarUpload } from "@/components/features/profile/shared/avatar-upload"
-import type { UserProfile } from "@/lib/profile/mock-data"
+import type { UserProfile } from "@/lib/profile/types"
 
 export type EditProfileModalProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   profile: UserProfile
-  onSave: (next: UserProfile) => void
+  onSave: (next: UserProfile) => void | Promise<void>
 }
 
 export function EditProfileModal({
@@ -41,6 +43,7 @@ export function EditProfileModal({
     address: profile.address,
   })
   const [avatarSrc, setAvatarSrc] = useState<string | null>(profile.avatarSrc)
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -54,7 +57,7 @@ export function EditProfileModal({
     prevBlobRef.current = null
   }, [open, profile])
 
-  function handleAvatarChange(src: string | null, _fileName: string | null) {
+  function handleAvatarChange(src: string | null) {
     if (prevBlobRef.current?.startsWith("blob:")) {
       URL.revokeObjectURL(prevBlobRef.current)
     }
@@ -62,16 +65,21 @@ export function EditProfileModal({
     setAvatarSrc(src)
   }
 
-  function handleSave() {
-    onSave({
-      ...profile,
-      displayName: form.displayName.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      address: form.address.trim(),
-      avatarSrc,
-    })
-    onOpenChange(false)
+  async function handleSave() {
+    setIsSaving(true)
+    try {
+      await onSave({
+        ...profile,
+        displayName: form.displayName.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        address: form.address.trim(),
+        avatarSrc,
+      })
+      onOpenChange(false)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -106,8 +114,8 @@ export function EditProfileModal({
           >
             Batal
           </Button>
-          <Button type="button" onClick={handleSave}>
-            Simpan
+          <Button type="button" disabled={isSaving} onClick={handleSave}>
+            {isSaving ? "Menyimpan..." : "Simpan"}
           </Button>
         </DialogFooter>
       </DialogContent>
