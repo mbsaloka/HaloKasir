@@ -3,7 +3,7 @@ import { PlusIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { formatRupiahCompact } from "@/lib/cashier/format-rupiah"
-import type { CashierProduct } from "@/lib/cashier/mock-products"
+import type { CashierProduct } from "@/lib/cashier/types"
 
 type ProductCardProps = {
   product: CashierProduct

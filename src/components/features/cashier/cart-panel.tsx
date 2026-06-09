@@ -9,7 +9,7 @@ import { ClearCartDialog } from "@/components/features/cashier/clear-cart-dialog
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-import type { CashierProduct } from "@/lib/cashier/mock-products"
+import type { CashierProduct } from "@/lib/cashier/types"
 
 export type PaymentMethod = "cash" | "card" | "qris"
 

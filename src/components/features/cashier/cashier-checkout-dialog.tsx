@@ -1,5 +1,7 @@
 "use client"
 
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { CheckCircle2Icon } from "lucide-react"
 
@@ -14,7 +16,6 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { PaymentMethod } from "@/components/features/cashier/cart-panel"
 import { formatRupiah } from "@/lib/cashier/format-rupiah"
-import { MOCK_CASHIER_DISPLAY_NAME } from "@/lib/cashier/mock-products"
 
 type CheckoutPhase = "pay" | "success"
 
@@ -26,8 +27,9 @@ type CashierCheckoutDialogProps = {
   discount: number
   tax: number
   total: number
+  cashierName: string
   paymentMethod: PaymentMethod
-  /** Setelah selesai — mis. kosongkan keranjang (mock) */
+  onPay: (paidAmount: number) => void | Promise<void>
   onComplete?: () => void
 }
 
@@ -67,10 +69,6 @@ function PaymentDetailRow({
   )
 }
 
-/**
- * Modal pembayaran mengikuti [Figma Pembayaran](https://www.figma.com/design/wpyuiqpNbm4iqzND88ecRD/KBT?node-id=23-26015):
- * ringkasan → (tunai: nominal dibayar) → Bayar → kembalian → Selesai.
- */
 export function CashierCheckoutDialog({
   open,
   onOpenChange,
@@ -79,12 +77,15 @@ export function CashierCheckoutDialog({
   discount,
   tax,
   total,
+  cashierName,
   paymentMethod,
+  onPay,
   onComplete,
 }: CashierCheckoutDialogProps) {
   const [phase, setPhase] = useState<CheckoutPhase>("pay")
   const [paidInput, setPaidInput] = useState("")
   const [paidAmount, setPaidAmount] = useState(0)
+  const [isPaying, setIsPaying] = useState(false)
 
   const tanggal = useMemo(() => {
     return new Intl.DateTimeFormat("id-ID", {
@@ -106,25 +107,29 @@ export function CashierCheckoutDialog({
       setPhase("pay")
       setPaidInput("")
       setPaidAmount(0)
+      setIsPaying(false)
     }
   }, [open])
 
   const paidParsed = parseDigitsOnly(paidInput)
-  const cashValid =
-    paymentMethod !== "cash" || paidParsed >= total
+  const cashValid = paymentMethod !== "cash" || paidParsed >= total
 
   function handlePaidChange(raw: string) {
     setPaidInput(formatIdrTyping(raw))
   }
 
-  function handleBayar() {
-    if (paymentMethod === "cash") {
-      if (!cashValid || paidParsed < total) return
-      setPaidAmount(paidParsed)
-    } else {
-      setPaidAmount(total)
+  async function handleBayar() {
+    if (paymentMethod === "cash" && (!cashValid || paidParsed < total)) return
+
+    const nextPaidAmount = paymentMethod === "cash" ? paidParsed : total
+    setIsPaying(true)
+    try {
+      await onPay(nextPaidAmount)
+      setPaidAmount(nextPaidAmount)
+      setPhase("success")
+    } finally {
+      setIsPaying(false)
     }
-    setPhase("success")
   }
 
   function handleSelesai() {
@@ -149,10 +154,7 @@ export function CashierCheckoutDialog({
             <div className="space-y-4 px-6 py-5">
               <div className="space-y-3">
                 <PaymentDetailRow label="Tanggal" value={tanggal} />
-                <PaymentDetailRow
-                  label="Kasir"
-                  value={MOCK_CASHIER_DISPLAY_NAME}
-                />
+                <PaymentDetailRow label="Kasir" value={cashierName} />
                 <PaymentDetailRow label="Faktur" value={invoiceNo} />
                 <PaymentDetailRow
                   label="Metode Pembayaran"
@@ -160,10 +162,7 @@ export function CashierCheckoutDialog({
                 />
                 <PaymentDetailRow label="Subtotal" value={formatRupiah(subtotal)} />
                 <PaymentDetailRow label="Diskon" value={formatRupiah(discount)} />
-                <PaymentDetailRow
-                  label="Pajak"
-                  value={formatRupiah(tax)}
-                />
+                <PaymentDetailRow label="Pajak" value={formatRupiah(tax)} />
                 <PaymentDetailRow
                   label="Total"
                   value={formatRupiah(total)}
@@ -217,11 +216,11 @@ export function CashierCheckoutDialog({
               </Button>
               <Button
                 type="button"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[100px] font-semibold"
-                disabled={paymentMethod === "cash" && !cashValid}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[112px] font-semibold"
+                disabled={isPaying || (paymentMethod === "cash" && !cashValid)}
                 onClick={handleBayar}
               >
-                Bayar
+                {isPaying ? "Menyimpan..." : "Bayar"}
               </Button>
             </DialogFooter>
           </>
@@ -247,15 +246,14 @@ export function CashierCheckoutDialog({
                     </p>
                   </div>
                   <p className="text-muted-foreground max-w-sm text-sm">
-                    Total tagihan {formatRupiah(total)} · Dibayar{" "}
-                    {formatRupiah(paidAmount)} (mock).
+                    Total tagihan {formatRupiah(total)} - Dibayar{" "}
+                    {formatRupiah(paidAmount)}.
                   </p>
                 </>
               ) : (
                 <p className="text-muted-foreground max-w-sm text-sm">
                   Transaksi <strong>{metodeLabel}</strong> senilai{" "}
-                  <strong>{formatRupiah(total)}</strong> telah dikonfirmasi
-                  (mock).
+                  <strong>{formatRupiah(total)}</strong> telah dikonfirmasi.
                 </p>
               )}
 

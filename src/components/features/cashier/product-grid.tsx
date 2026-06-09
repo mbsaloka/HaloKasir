@@ -1,4 +1,4 @@
-import type { CashierProduct } from "@/lib/cashier/mock-products"
+import type { CashierProduct } from "@/lib/cashier/types"
 
 import { ProductCard } from "./product-card"
 

@@ -1,4 +1,4 @@
-/** Format angka ke string Rupiah (mock UI, tanpa locale backend) */
+/** Format angka ke string Rupiah. */
 export function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",

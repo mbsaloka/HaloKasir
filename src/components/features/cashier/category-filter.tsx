@@ -5,15 +5,19 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import type { CashierCategory } from "@/lib/cashier/mock-products"
-import { CASHIER_CATEGORIES } from "@/lib/cashier/mock-products"
+import type { CashierCategory } from "@/lib/cashier/types"
 
 type CategoryFilterProps = {
   value: CashierCategory
+  categories: CashierCategory[]
   onChange: (c: CashierCategory) => void
 }
 
-export function CategoryFilter({ value, onChange }: CategoryFilterProps) {
+export function CategoryFilter({
+  value,
+  categories,
+  onChange,
+}: CategoryFilterProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   function scrollByDir(dir: -1 | 1) {
@@ -38,7 +42,7 @@ export function CategoryFilter({ value, onChange }: CategoryFilterProps) {
         ref={scrollRef}
         className="flex flex-1 gap-2 overflow-x-auto py-0.5 [scrollbar-width:thin]"
       >
-        {CASHIER_CATEGORIES.map((cat) => (
+        {categories.map((cat) => (
           <Button
             key={cat}
             type="button"

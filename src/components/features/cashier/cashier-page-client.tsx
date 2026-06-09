@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 
 import { CashierCheckoutDialog } from "@/components/features/cashier/cashier-checkout-dialog"
 import {
@@ -18,25 +19,44 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import type {
   CashierCategory,
   CashierProduct,
-} from "@/lib/cashier/mock-products"
-import { MOCK_INVOICE_NO, MOCK_PRODUCTS } from "@/lib/cashier/mock-products"
+} from "@/lib/cashier/types"
+import { createSaleAction } from "@/lib/actions/sales"
 
-function findProduct(id: string): CashierProduct | undefined {
-  return MOCK_PRODUCTS.find((p) => p.id === id)
+type CashierPageClientProps = {
+  products: CashierProduct[]
+  categories: CashierCategory[]
+  cashierName: string
 }
 
-export function CashierPageClient() {
+function makeInvoiceNo() {
+  const d = new Date()
+  const yy = String(d.getFullYear()).slice(-2)
+  const mm = String(d.getMonth() + 1).padStart(2, "0")
+  const dd = String(d.getDate()).padStart(2, "0")
+  return `KSR${yy}${mm}${dd}${String(Date.now()).slice(-6)}`
+}
+
+export function CashierPageClient({
+  products,
+  categories,
+  cashierName,
+}: CashierPageClientProps) {
+  const router = useRouter()
+  const [invoiceNo, setInvoiceNo] = useState(makeInvoiceNo)
   const [query, setQuery] = useState("")
   const [category, setCategory] = useState<CashierCategory>("Semua")
   const [sortMode, setSortMode] = useState<SortMode>("name")
-  const [cart, setCart] = useState<{ productId: string; quantity: number }[]>(
-    []
-  )
+  const [cart, setCart] = useState<{ productId: string; quantity: number }[]>([])
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash")
   const [checkoutOpen, setCheckoutOpen] = useState(false)
 
+  const productById = useMemo(
+    () => new Map(products.map((product) => [product.id, product])),
+    [products]
+  )
+
   const filteredProducts = useMemo(() => {
-    let list = [...MOCK_PRODUCTS]
+    let list = [...products]
 
     if (category !== "Semua") {
       list = list.filter((p) => p.category === category)
@@ -59,17 +79,17 @@ export function CashierPageClient() {
     })
 
     return list
-  }, [category, query, sortMode])
+  }, [category, products, query, sortMode])
 
   const cartLines = useMemo(() => {
     return cart
       .map((line) => {
-        const product = findProduct(line.productId)
+        const product = productById.get(line.productId)
         if (!product) return null
         return { product, quantity: line.quantity }
       })
       .filter(Boolean) as { product: CashierProduct; quantity: number }[]
-  }, [cart])
+  }, [cart, productById])
 
   const subtotal = useMemo(() => {
     return cartLines.reduce((sum, { product, quantity }) => {
@@ -137,6 +157,28 @@ export function CashierPageClient() {
     setSortMode((m) => (m === "name" ? "price" : "name"))
   }
 
+  async function persistCheckout(paidAmount: number) {
+    await createSaleAction({
+      invoiceNo,
+      paymentMethod,
+      subtotal,
+      discount,
+      tax,
+      total,
+      paidAmount,
+      lines: cart.map((line) => ({
+        productId: line.productId,
+        quantity: line.quantity,
+      })),
+    })
+  }
+
+  function completeCheckout() {
+    clearCart()
+    setInvoiceNo(makeInvoiceNo())
+    router.refresh()
+  }
+
   return (
     <>
       <PosLayout
@@ -147,11 +189,15 @@ export function CashierPageClient() {
                 Point of Sale
               </h1>
               <p className="text-muted-foreground text-xs">
-                Kasir cepat — data mock, tanpa API.
+                Kasir cepat dengan katalog dari database.
               </p>
             </div>
 
-            <CategoryFilter value={category} onChange={setCategory} />
+            <CategoryFilter
+              value={category}
+              categories={categories}
+              onChange={setCategory}
+            />
 
             <CashierSearchBar
               query={query}
@@ -169,7 +215,7 @@ export function CashierPageClient() {
         }
         cart={
           <CartPanel
-            invoiceNo={MOCK_INVOICE_NO}
+            invoiceNo={invoiceNo}
             lines={cartLines}
             subtotal={subtotal}
             discount={discount}
@@ -189,13 +235,15 @@ export function CashierPageClient() {
       <CashierCheckoutDialog
         open={checkoutOpen}
         onOpenChange={setCheckoutOpen}
-        invoiceNo={MOCK_INVOICE_NO}
+        invoiceNo={invoiceNo}
         subtotal={subtotal}
         discount={discount}
         tax={tax}
         total={total}
+        cashierName={cashierName}
         paymentMethod={paymentMethod}
-        onComplete={clearCart}
+        onPay={persistCheckout}
+        onComplete={completeCheckout}
       />
     </>
   )

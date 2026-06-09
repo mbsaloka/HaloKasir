@@ -4,7 +4,7 @@ import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { formatRupiah, formatRupiahCompact } from "@/lib/cashier/format-rupiah"
-import type { CashierProduct } from "@/lib/cashier/mock-products"
+import type { CashierProduct } from "@/lib/cashier/types"
 
 type CartItemRowProps = {
   product: CashierProduct
