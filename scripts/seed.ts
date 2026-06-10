@@ -6,6 +6,7 @@ import { assertDatabaseConfigured, db } from "../src/db"
 import {
   account,
   accountHistory,
+  appSettings,
   members,
   products,
   purchaseLines,
@@ -18,6 +19,12 @@ import {
   verification,
 } from "../src/db/schema"
 import { auth } from "../src/lib/auth"
+import {
+  calculateEarnedMemberPoints,
+  defaultLoyaltySettings,
+  LOYALTY_SETTINGS_ID,
+} from "../src/lib/settings/loyalty"
+import type { MembershipTier } from "../src/lib/membership/types"
 
 assertDatabaseConfigured()
 
@@ -25,10 +32,12 @@ type ProductSeed = typeof products.$inferInsert
 type SupplierSeed = typeof suppliers.$inferInsert
 type MemberSeed = typeof members.$inferInsert
 
-const now = new Date()
+// Keep demo timestamps deterministic and away from the real current day.
+// This still gives the dashboard data for this week/month/year in the sample set.
+const seedReferenceDate = new Date(2026, 5, 9)
 
 function dateDaysAgo(days: number, hour = 10, minute = 0) {
-  const date = new Date(now)
+  const date = new Date(seedReferenceDate)
   date.setDate(date.getDate() - days)
   date.setHours(hour, minute, 0, 0)
   return date
@@ -45,12 +54,13 @@ function makeId(prefix: string, index: number) {
 }
 
 function expiry(monthsFromNow: number) {
-  const date = addMonths(now, monthsFromNow)
+  const date = addMonths(seedReferenceDate, monthsFromNow)
   return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`
 }
 
 async function resetDatabase() {
   await db.delete(accountHistory)
+  await db.delete(appSettings)
   await db.delete(purchaseLines)
   await db.delete(purchaseRecords)
   await db.delete(salesTransactionItems)
@@ -366,7 +376,15 @@ async function seedSales(cashiers: { id: string; name: string }[]) {
 
     if (member && status === "Selesai") {
       const memberSeed = memberSeeds.find((row) => row.id === member.id)
-      if (memberSeed) memberSeed.points = Number(memberSeed.points) + Math.floor(total / 1000)
+      if (memberSeed) {
+        memberSeed.points =
+          Number(memberSeed.points) +
+          calculateEarnedMemberPoints({
+            amount: total,
+            tier: memberSeed.tier as MembershipTier,
+            settings: defaultLoyaltySettings(),
+          })
+      }
     }
 
     void profit
@@ -482,6 +500,11 @@ async function main() {
     phone: "081299996666",
     role: "Supervisor",
     address: "Jl. Asia Afrika No. 20, Bandung",
+  })
+
+  await db.insert(appSettings).values({
+    id: LOYALTY_SETTINGS_ID,
+    ...defaultLoyaltySettings(),
   })
 
   await seedSales([
