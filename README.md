@@ -13,6 +13,8 @@ BETTER_AUTH_URL="http://localhost:3000"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
+For Vercel production, set `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_URL` to your canonical `https://...` domain, then redeploy so the client-side `NEXT_PUBLIC_APP_URL` is rebuilt. If you also use preview, branch, or alternate custom domains, add them to `BETTER_AUTH_TRUSTED_ORIGINS` as a comma-separated list.
+
 ## Database
 
 Generate and apply schema changes:
