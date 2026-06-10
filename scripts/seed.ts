@@ -53,6 +53,10 @@ function makeId(prefix: string, index: number) {
   return `${prefix}-${String(index).padStart(3, "0")}`
 }
 
+function productPhoto(fileName: string) {
+  return `/product-photos/${fileName}`
+}
+
 function expiry(monthsFromNow: number) {
   const date = addMonths(seedReferenceDate, monthsFromNow)
   return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`
@@ -123,6 +127,7 @@ const productSeeds: ProductSeed[] = [
     cost: 2450,
     stock: 320,
     reorderLevel: 40,
+    imageSrc: productPhoto("indomie-goreng.png"),
     isActive: true,
   },
   {
@@ -136,6 +141,7 @@ const productSeeds: ProductSeed[] = [
     cost: 2450,
     stock: 280,
     reorderLevel: 40,
+    imageSrc: productPhoto("indomie-soto.png"),
     isActive: true,
   },
   {
@@ -149,6 +155,7 @@ const productSeeds: ProductSeed[] = [
     cost: 2350,
     stock: 210,
     reorderLevel: 35,
+    imageSrc: productPhoto("mie-sedaap.png"),
     isActive: true,
   },
   {
@@ -162,6 +169,7 @@ const productSeeds: ProductSeed[] = [
     cost: 3400,
     stock: 150,
     reorderLevel: 30,
+    imageSrc: productPhoto("teh-botol.jpeg"),
     isActive: true,
   },
   {
@@ -175,6 +183,7 @@ const productSeeds: ProductSeed[] = [
     cost: 14200,
     stock: 80,
     reorderLevel: 16,
+    imageSrc: productPhoto("ultra-milk.jpg"),
     isActive: true,
   },
   {
@@ -188,6 +197,7 @@ const productSeeds: ProductSeed[] = [
     cost: 8200,
     stock: 100,
     reorderLevel: 20,
+    imageSrc: productPhoto("chitato.png"),
     isActive: true,
   },
   {
@@ -201,6 +211,7 @@ const productSeeds: ProductSeed[] = [
     cost: 1700,
     stock: 260,
     reorderLevel: 50,
+    imageSrc: productPhoto("royco-ayam.png"),
     isActive: true,
   },
   {
@@ -214,6 +225,7 @@ const productSeeds: ProductSeed[] = [
     cost: 6100,
     stock: 90,
     reorderLevel: 18,
+    imageSrc: productPhoto("sabun-cuci.png"),
     isActive: true,
   },
   {
@@ -227,6 +239,7 @@ const productSeeds: ProductSeed[] = [
     cost: 68000,
     stock: 42,
     reorderLevel: 8,
+    imageSrc: productPhoto("beras-premium.jpg"),
     isActive: true,
   },
   {
@@ -240,6 +253,7 @@ const productSeeds: ProductSeed[] = [
     cost: 10300,
     stock: 72,
     reorderLevel: 14,
+    imageSrc: productPhoto("kopi-kapal-api.png"),
     isActive: true,
   },
   {
@@ -253,6 +267,7 @@ const productSeeds: ProductSeed[] = [
     cost: 15900,
     stock: 96,
     reorderLevel: 20,
+    imageSrc: productPhoto("minyak-1l.jpg"),
     isActive: true,
   },
   {
@@ -266,6 +281,7 @@ const productSeeds: ProductSeed[] = [
     cost: 32000,
     stock: 36,
     reorderLevel: 8,
+    imageSrc: productPhoto("lampu-led-9w.png"),
     isActive: true,
   },
 ]

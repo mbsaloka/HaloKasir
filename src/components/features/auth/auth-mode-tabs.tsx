@@ -23,9 +23,9 @@ export function AuthModeTabs({ mode }: AuthModeTabsProps) {
       }}
       className="w-full"
     >
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className="grid w-full grid-cols-1">
         <TabsTrigger value="login">Masuk</TabsTrigger>
-        <TabsTrigger value="register">Daftar</TabsTrigger>
+        {/* <TabsTrigger value="register">Daftar</TabsTrigger> */}
       </TabsList>
     </Tabs>
   )
