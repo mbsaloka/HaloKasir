@@ -105,8 +105,7 @@ export function ProductModal({
     }
   }
 
-  const title =
-    mode === "create" ? "Stok Barang Baru" : "Edit Stok Barang"
+  const title = mode === "create" ? "Tambah Item" : "Edit Item"
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -68,6 +68,7 @@ export async function getPurchaseRecords(): Promise<IncomingGoodsRecord[]> {
     status: mapStatus(record.status),
     lines: (linesByPurchase.get(record.id) ?? []).map((line) => ({
       id: line.id,
+      productId: line.productId ?? "",
       barcode: line.barcode,
       productName: line.productName,
       unitPrice: line.unitPrice,

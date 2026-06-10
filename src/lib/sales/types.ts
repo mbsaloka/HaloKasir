@@ -25,7 +25,11 @@ export type BestSellingProduct = {
   increasePercent: number
 }
 
-export type TransactionPaymentMethod = "Tunai" | "Kartu" | "QRIS"
+export type TransactionPaymentMethod =
+  | "Tunai"
+  | "Kartu"
+  | "QRIS"
+  | "Online Payment"
 
 export type TransactionStatus = "Selesai" | "Dibatalkan"
 

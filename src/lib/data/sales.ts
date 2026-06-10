@@ -44,7 +44,14 @@ function percentChange(current: number, previous: number) {
 }
 
 function mapPaymentMethod(value: string): TransactionPaymentMethod {
-  if (value === "Kartu" || value === "QRIS" || value === "Tunai") return value
+  if (
+    value === "Kartu" ||
+    value === "QRIS" ||
+    value === "Tunai" ||
+    value === "Online Payment"
+  ) {
+    return value
+  }
   return "Tunai"
 }
 

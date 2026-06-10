@@ -50,7 +50,7 @@ export function ReportToolbar({
           <Button type="button" size="sm" className="h-9 gap-1 shadow-xs" asChild>
             <Link href="/purchase/incoming">
               <PlusIcon className="size-4" />
-              Tambah Stok
+              Barang Masuk
             </Link>
           </Button>
           <Button

@@ -10,10 +10,11 @@ import {
 } from "@/components/features/purchase/incoming/incoming-form"
 import { IncomingLinesTable } from "@/components/features/purchase/incoming/incoming-lines-table"
 import { TotalPembelianModal } from "@/components/features/purchase/incoming/incoming-modal"
+import type { InventoryProduct } from "@/lib/inventory/types"
 import type { PurchaseLine } from "@/lib/purchase/types"
 
 type IncomingEntryPanelProps = {
-  suppliers: string[]
+  products: InventoryProduct[]
   onCompletePurchase: (record: {
     lines: PurchaseLine[]
     supplier: string
@@ -25,8 +26,6 @@ type IncomingEntryPanelProps = {
   }) => Promise<void> | void
 }
 
-const fallbackSuppliers = ["Pemasok Umum"]
-
 function invoiceDraft() {
   const d = new Date()
   const yy = String(d.getFullYear()).slice(-2)
@@ -35,11 +34,10 @@ function invoiceDraft() {
   return `PMB${yy}${mm}${dd}${String(Date.now()).slice(-6)}`
 }
 
-function emptyForm(suppliers: string[]): IncomingFormValues {
+function emptyForm(): IncomingFormValues {
   return {
-    supplier: suppliers[0] ?? fallbackSuppliers[0],
-    barcode: "",
-    nama: "",
+    supplier: "",
+    productId: "",
     harga: "",
     qty: "",
     expiry: "",
@@ -47,12 +45,11 @@ function emptyForm(suppliers: string[]): IncomingFormValues {
 }
 
 export function IncomingEntryPanel({
-  suppliers,
+  products,
   onCompletePurchase,
 }: IncomingEntryPanelProps) {
-  const supplierOptions = suppliers.length > 0 ? suppliers : fallbackSuppliers
   const [form, setForm] = useState<IncomingFormValues>(() =>
-    emptyForm(supplierOptions)
+    emptyForm()
   )
   const [lines, setLines] = useState<PurchaseLine[]>([])
   const [totalModalOpen, setTotalModalOpen] = useState(false)
@@ -75,19 +72,17 @@ export function IncomingEntryPanel({
   function addLine() {
     const price = Number(String(form.harga).replace(/\D/g, "")) || 0
     const q = Number(String(form.qty).replace(/\D/g, "")) || 0
-    if (
-      !form.barcode.trim() ||
-      !form.nama.trim() ||
-      !form.expiry.trim() ||
-      price <= 0 ||
-      q <= 0
-    ) {
+    const product = products.find((p) => p.id === form.productId)
+
+    if (!form.supplier.trim() || !product || price <= 0 || q <= 0) {
       return
     }
+
     const line: PurchaseLine = {
       id: `draft-${Date.now()}`,
-      barcode: form.barcode.trim(),
-      productName: form.nama.trim(),
+      productId: product.id,
+      barcode: product.itemId,
+      productName: product.name,
       unitPrice: price,
       qty: q,
       expiry: form.expiry.trim(),
@@ -95,8 +90,7 @@ export function IncomingEntryPanel({
     setLines((prev) => [...prev, line])
     setForm((prev) => ({
       ...prev,
-      barcode: "",
-      nama: "",
+      productId: "",
       harga: "",
       qty: "",
       expiry: "",
@@ -107,8 +101,7 @@ export function IncomingEntryPanel({
     setLines((prev) => prev.filter((l) => l.id !== line.id))
     setForm((prev) => ({
       ...prev,
-      barcode: line.barcode,
-      nama: line.productName,
+      productId: line.productId ?? "",
       harga: String(line.unitPrice),
       qty: String(line.qty),
       expiry: line.expiry,
@@ -117,7 +110,7 @@ export function IncomingEntryPanel({
 
   function handleBatal() {
     setLines([])
-    setForm(emptyForm(supplierOptions))
+    setForm(emptyForm())
   }
 
   return (
@@ -132,7 +125,7 @@ export function IncomingEntryPanel({
       <IncomingForm
         value={form}
         onChange={setForm}
-        suppliers={supplierOptions}
+        products={products}
       />
 
       <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -177,7 +170,7 @@ export function IncomingEntryPanel({
         onConfirm={async ({ discount, notes, paymentMethod, cashPaid }) => {
           await onCompletePurchase({
             lines,
-            supplier: form.supplier,
+            supplier: form.supplier.trim(),
             grandTotal: Math.max(0, runningTotal - discount),
             discount,
             notes,

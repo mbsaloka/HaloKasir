@@ -8,5 +8,6 @@ export type CashierProduct = {
   name: string
   category: CashierCategory
   price: number
+  stock: number
   imageSrc: string
 }

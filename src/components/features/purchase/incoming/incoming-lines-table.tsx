@@ -28,8 +28,7 @@ export function IncomingLinesTable({
         <TableHeader>
           <TableRow className="bg-muted/40 hover:bg-muted/40">
             <TableHead className="w-10">#</TableHead>
-            <TableHead>Barcode</TableHead>
-            <TableHead>Nama Produk</TableHead>
+            <TableHead>Item</TableHead>
             <TableHead className="text-right">Harga Beli</TableHead>
             <TableHead className="text-right">Kuantitas</TableHead>
             <TableHead>Kadaluwarsa</TableHead>
@@ -41,7 +40,7 @@ export function IncomingLinesTable({
           {lines.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={8}
+                colSpan={7}
                 className="text-muted-foreground p-8 text-center"
               >
                 Belum ada baris. Isi form dan klik Tambah.
@@ -51,13 +50,19 @@ export function IncomingLinesTable({
             lines.map((l, i) => (
               <TableRow key={l.id}>
                 <TableCell>{i + 1}</TableCell>
-                <TableCell className="tabular-nums">{l.barcode}</TableCell>
-                <TableCell className="font-medium">{l.productName}</TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-medium">{l.productName}</span>
+                    <span className="text-muted-foreground text-xs tabular-nums">
+                      ID Item {l.barcode}
+                    </span>
+                  </div>
+                </TableCell>
                 <TableCell className="text-right tabular-nums">
                   {l.unitPrice.toLocaleString("id-ID")}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">{l.qty}</TableCell>
-                <TableCell>{l.expiry}</TableCell>
+                <TableCell>{l.expiry || "-"}</TableCell>
                 <TableCell className="text-right tabular-nums font-medium">
                   {(l.unitPrice * l.qty).toLocaleString("id-ID")}
                 </TableCell>

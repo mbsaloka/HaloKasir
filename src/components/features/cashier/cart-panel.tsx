@@ -1,17 +1,19 @@
 "use client"
 
 import * as React from "react"
-import { BanknoteIcon, CreditCardIcon, QrCodeIcon, XIcon } from "lucide-react"
+import { BanknoteIcon, CreditCardIcon, XIcon } from "lucide-react"
 
 import { CartItemRow } from "@/components/features/cashier/cart-item-row"
 import { CheckoutSummary } from "@/components/features/cashier/checkout-summary"
 import { ClearCartDialog } from "@/components/features/cashier/clear-cart-dialog"
+import { MemberPointSelector } from "@/components/features/cashier/member-point-selector"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import type { CashierProduct } from "@/lib/cashier/types"
+import type { Member } from "@/lib/membership/types"
 
-export type PaymentMethod = "cash" | "card" | "qris"
+export type PaymentMethod = "cash" | "online"
 
 type CartLine = {
   product: CashierProduct
@@ -25,6 +27,16 @@ type CartPanelProps = {
   discount: number
   tax: number
   total: number
+  members: Member[]
+  selectedMember: Member | null
+  pointInput: string
+  pointDiscount: number
+  maxPointDiscount: number
+  onSelectMember: (memberId: string | null) => void
+  onPointInputChange: (value: string) => void
+  onUseAllPoints: () => void
+  onUseFullTotal: () => void
+  onClearPoints: () => void
   paymentMethod: PaymentMethod
   onPaymentMethodChange: (m: PaymentMethod) => void
   onIncrement: (productId: string) => void
@@ -40,8 +52,7 @@ const PAYMENT_OPTIONS: {
   icon: typeof BanknoteIcon
 }[] = [
   { id: "cash", label: "Tunai", icon: BanknoteIcon },
-  { id: "card", label: "Kartu", icon: CreditCardIcon },
-  { id: "qris", label: "QRIS", icon: QrCodeIcon },
+  { id: "online", label: "Online Payment", icon: CreditCardIcon },
 ]
 
 export function CartPanel({
@@ -51,6 +62,16 @@ export function CartPanel({
   discount,
   tax,
   total,
+  members,
+  selectedMember,
+  pointInput,
+  pointDiscount,
+  maxPointDiscount,
+  onSelectMember,
+  onPointInputChange,
+  onUseAllPoints,
+  onUseFullTotal,
+  onClearPoints,
   paymentMethod,
   onPaymentMethodChange,
   onIncrement,
@@ -115,11 +136,24 @@ export function CartPanel({
             total={total}
           />
 
+          <MemberPointSelector
+            members={members}
+            selectedMember={selectedMember}
+            pointInput={pointInput}
+            pointDiscount={pointDiscount}
+            maxPointDiscount={maxPointDiscount}
+            onSelectMember={onSelectMember}
+            onPointInputChange={onPointInputChange}
+            onUseAllPoints={onUseAllPoints}
+            onUseFullTotal={onUseFullTotal}
+            onClearPoints={onClearPoints}
+          />
+
           <div className="space-y-2">
             <p className="text-muted-foreground text-xs font-medium">
               Metode Pembayaran
             </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {PAYMENT_OPTIONS.map(({ id, label, icon: Icon }) => (
                 <Button
                   key={id}

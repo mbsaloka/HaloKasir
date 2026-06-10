@@ -18,15 +18,16 @@ import {
   type PurchaseLine,
 } from "@/lib/purchase/types"
 import { createPurchaseAction } from "@/lib/actions/purchase"
+import type { InventoryProduct } from "@/lib/inventory/types"
 
 type IncomingPageClientProps = {
   initialHistory: IncomingGoodsRecord[]
-  suppliers: string[]
+  products: InventoryProduct[]
 }
 
 export function IncomingPageClient({
   initialHistory,
-  suppliers,
+  products,
 }: IncomingPageClientProps) {
   const router = useRouter()
   const [history, setHistory] = useState<IncomingGoodsRecord[]>(initialHistory)
@@ -81,7 +82,7 @@ export function IncomingPageClient({
 
         <TabsContent value="entri" className="mt-0">
           <IncomingEntryPanel
-            suppliers={suppliers}
+            products={products}
             onCompletePurchase={handleCompletePurchase}
           />
         </TabsContent>

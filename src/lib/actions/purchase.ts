@@ -1,6 +1,6 @@
 "use server"
 
-import { eq, or, sql } from "drizzle-orm"
+import { eq, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
@@ -26,11 +26,10 @@ const purchasePayloadSchema = z.object({
   lines: z
     .array(
       z.object({
-        barcode: z.string().trim().min(1),
-        productName: z.string().trim().min(1),
+        productId: z.string().trim().min(1),
         unitPrice: z.number().int().min(0),
         qty: z.number().int().min(1),
-        expiry: z.string().trim().min(1),
+        expiry: z.string().trim().optional().default(""),
       })
     )
     .min(1),
@@ -38,14 +37,6 @@ const purchasePayloadSchema = z.object({
 
 function makeId(prefix: string) {
   return `${prefix}-${crypto.randomUUID()}`
-}
-
-function randomDigits(len: number) {
-  let s = ""
-  for (let i = 0; i < len; i += 1) {
-    s += String(Math.floor(Math.random() * 10))
-  }
-  return s
 }
 
 function invoiceNo() {
@@ -69,6 +60,7 @@ export async function createPurchaseAction(
     (sum, line) => sum + line.unitPrice * line.qty,
     0
   )
+  const recordedLines: IncomingGoodsRecord["lines"] = []
 
   await db.transaction(async (tx) => {
     let [supplier] = await tx
@@ -104,51 +96,47 @@ export async function createPurchaseAction(
     })
 
     for (const line of values.lines) {
-      let [product] = await tx
+      const [product] = await tx
         .select()
         .from(products)
-        .where(or(eq(products.sku, line.barcode), eq(products.itemId, line.barcode)))
+        .where(eq(products.id, line.productId))
         .limit(1)
 
       if (!product) {
-        ;[product] = await tx
-          .insert(products)
-          .values({
-            id: makeId("prd"),
-            sku: line.barcode,
-            stockId: randomDigits(6),
-            itemId: line.barcode,
-            name: line.productName,
-            category: "Kebutuhan Rumah Tangga",
-            price: Math.round(line.unitPrice * 1.25),
-            cost: line.unitPrice,
-            stock: line.qty,
-            imageSrc: "/placeholder-product.svg",
-            reorderLevel: 10,
-            isActive: true,
-          })
-          .returning()
-      } else {
-        await tx
-          .update(products)
-          .set({
-            name: line.productName,
-            cost: line.unitPrice,
-            stock: sql`${products.stock} + ${line.qty}`,
-            updatedAt: new Date(),
-          })
-          .where(eq(products.id, product.id))
+        throw new Error("Produk tidak ditemukan.")
       }
 
+      await tx
+        .update(products)
+        .set({
+          cost: line.unitPrice,
+          stock: sql`${products.stock} + ${line.qty}`,
+          updatedAt: new Date(),
+        })
+        .where(eq(products.id, product.id))
+
+      const lineId = makeId("purchase-line")
+      const expiry = line.expiry ?? ""
+
       await tx.insert(purchaseLines).values({
-        id: makeId("purchase-line"),
+        id: lineId,
         purchaseId: id,
         productId: product.id,
-        barcode: line.barcode,
-        productName: line.productName,
+        barcode: product.itemId,
+        productName: product.name,
         unitPrice: line.unitPrice,
         qty: line.qty,
-        expiry: line.expiry,
+        expiry,
+      })
+
+      recordedLines.push({
+        id: lineId,
+        productId: product.id,
+        barcode: product.itemId,
+        productName: product.name,
+        unitPrice: line.unitPrice,
+        qty: line.qty,
+        expiry,
       })
     }
 
@@ -172,14 +160,7 @@ export async function createPurchaseAction(
     supplier: values.supplier,
     purchasedAt: formatDisplayDateTime(now),
     status: "Received",
-    lines: values.lines.map((line, index) => ({
-      id: `${id}-line-${index}`,
-      barcode: line.barcode,
-      productName: line.productName,
-      unitPrice: line.unitPrice,
-      qty: line.qty,
-      expiry: line.expiry,
-    })),
+    lines: recordedLines,
     grandTotal: values.grandTotal,
   }
 }

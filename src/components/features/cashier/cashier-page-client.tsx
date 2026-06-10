@@ -16,39 +16,49 @@ import {
 } from "@/components/features/cashier/cashier-search-bar"
 import { ProductGrid } from "@/components/features/cashier/product-grid"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { calculateCheckoutTotals } from "@/lib/cashier/checkout-totals"
+import { makeCashierInvoiceNo } from "@/lib/cashier/invoice"
 import type {
   CashierCategory,
   CashierProduct,
 } from "@/lib/cashier/types"
 import { createSaleAction } from "@/lib/actions/sales"
+import type { Member } from "@/lib/membership/types"
 
 type CashierPageClientProps = {
   products: CashierProduct[]
   categories: CashierCategory[]
+  members: Member[]
   cashierName: string
+  initialInvoiceNo: string
 }
 
-function makeInvoiceNo() {
-  const d = new Date()
-  const yy = String(d.getFullYear()).slice(-2)
-  const mm = String(d.getMonth() + 1).padStart(2, "0")
-  const dd = String(d.getDate()).padStart(2, "0")
-  return `KSR${yy}${mm}${dd}${String(Date.now()).slice(-6)}`
+function parsePointValue(value: string) {
+  const digits = value.replace(/\D/g, "")
+  return digits ? Number(digits) : 0
+}
+
+function formatPointValue(value: number) {
+  return Math.max(0, Math.trunc(value)).toLocaleString("id-ID")
 }
 
 export function CashierPageClient({
   products,
   categories,
+  members,
   cashierName,
+  initialInvoiceNo,
 }: CashierPageClientProps) {
   const router = useRouter()
-  const [invoiceNo, setInvoiceNo] = useState(makeInvoiceNo)
+  const [invoiceNo, setInvoiceNo] = useState(initialInvoiceNo)
   const [query, setQuery] = useState("")
   const [category, setCategory] = useState<CashierCategory>("Semua")
   const [sortMode, setSortMode] = useState<SortMode>("name")
   const [cart, setCart] = useState<{ productId: string; quantity: number }[]>([])
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash")
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null)
+  const [pointInput, setPointInput] = useState("0")
 
   const productById = useMemo(
     () => new Map(products.map((product) => [product.id, product])),
@@ -91,26 +101,46 @@ export function CashierPageClient({
       .filter(Boolean) as { product: CashierProduct; quantity: number }[]
   }, [cart, productById])
 
+  const cartQuantityById = useMemo(() => {
+    return new Map(cart.map((line) => [line.productId, line.quantity]))
+  }, [cart])
+
   const subtotal = useMemo(() => {
     return cartLines.reduce((sum, { product, quantity }) => {
       return sum + product.price * quantity
     }, 0)
   }, [cartLines])
 
-  const discount = useMemo(() => {
-    return subtotal >= 50_000 ? 1_000 : 0
-  }, [subtotal])
+  const selectedMember = useMemo(() => {
+    if (!selectedMemberId) return null
+    return members.find((member) => member.id === selectedMemberId) ?? null
+  }, [members, selectedMemberId])
 
-  const taxableBase = Math.max(0, subtotal - discount)
-  const tax = useMemo(() => {
-    return Math.round(taxableBase * 0.11)
-  }, [taxableBase])
+  const maxPointDiscount = useMemo(() => {
+    if (!selectedMember) return 0
+    return Math.min(selectedMember.points, subtotal)
+  }, [selectedMember, subtotal])
 
-  const total = taxableBase + tax
+  const pointDiscount = useMemo(() => {
+    if (!selectedMember) return 0
+    return Math.min(parsePointValue(pointInput), maxPointDiscount)
+  }, [maxPointDiscount, pointInput, selectedMember])
+
+  const { discount, tax, total } = useMemo(
+    () => calculateCheckoutTotals(subtotal, pointDiscount),
+    [pointDiscount, subtotal]
+  )
+  const displayedPointInput = selectedMember ? formatPointValue(discount) : "0"
 
   function addProduct(product: CashierProduct) {
     setCart((prev) => {
       const i = prev.findIndex((x) => x.productId === product.id)
+      const currentQuantity = i >= 0 ? prev[i].quantity : 0
+
+      if (currentQuantity >= product.stock) {
+        return prev
+      }
+
       if (i >= 0) {
         const next = [...prev]
         next[i] = {
@@ -124,10 +154,13 @@ export function CashierPageClient({
   }
 
   function increment(productId: string) {
+    const product = productById.get(productId)
+    if (!product) return
+
     setCart((prev) =>
       prev.map((line) =>
         line.productId === productId
-          ? { ...line, quantity: line.quantity + 1 }
+          ? { ...line, quantity: Math.min(product.stock, line.quantity + 1) }
           : line
       )
     )
@@ -157,10 +190,29 @@ export function CashierPageClient({
     setSortMode((m) => (m === "name" ? "price" : "name"))
   }
 
+  function selectMember(memberId: string | null) {
+    setSelectedMemberId(memberId)
+    setPointInput("0")
+  }
+
+  function changePointInput(value: string) {
+    const parsed = parsePointValue(value)
+    setPointInput(formatPointValue(Math.min(parsed, maxPointDiscount)))
+  }
+
+  function useMaximumPoints() {
+    setPointInput(formatPointValue(maxPointDiscount))
+  }
+
+  function clearPoints() {
+    setPointInput("0")
+  }
+
   async function persistCheckout(paidAmount: number) {
     await createSaleAction({
       invoiceNo,
       paymentMethod,
+      memberId: selectedMember?.id ?? null,
       subtotal,
       discount,
       tax,
@@ -175,7 +227,8 @@ export function CashierPageClient({
 
   function completeCheckout() {
     clearCart()
-    setInvoiceNo(makeInvoiceNo())
+    selectMember(null)
+    setInvoiceNo(makeCashierInvoiceNo())
     router.refresh()
   }
 
@@ -208,7 +261,11 @@ export function CashierPageClient({
 
             <ScrollArea className="min-h-[420px] flex-1 lg:min-h-0">
               <div className="pr-4 pb-4">
-                <ProductGrid products={filteredProducts} onAdd={addProduct} />
+                <ProductGrid
+                  products={filteredProducts}
+                  cartQuantityById={cartQuantityById}
+                  onAdd={addProduct}
+                />
               </div>
             </ScrollArea>
           </section>
@@ -221,6 +278,16 @@ export function CashierPageClient({
             discount={discount}
             tax={tax}
             total={total}
+            members={members}
+            selectedMember={selectedMember}
+            pointInput={displayedPointInput}
+            pointDiscount={discount}
+            maxPointDiscount={maxPointDiscount}
+            onSelectMember={selectMember}
+            onPointInputChange={changePointInput}
+            onUseAllPoints={useMaximumPoints}
+            onUseFullTotal={useMaximumPoints}
+            onClearPoints={clearPoints}
             paymentMethod={paymentMethod}
             onPaymentMethodChange={setPaymentMethod}
             onIncrement={increment}
@@ -242,6 +309,8 @@ export function CashierPageClient({
         total={total}
         cashierName={cashierName}
         paymentMethod={paymentMethod}
+        memberId={selectedMember?.id ?? null}
+        lines={cart}
         onPay={persistCheckout}
         onComplete={completeCheckout}
       />

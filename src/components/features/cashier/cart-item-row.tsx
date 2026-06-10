@@ -22,12 +22,15 @@ export function CartItemRow({
   onRemove,
 }: CartItemRowProps) {
   const lineTotal = product.price * quantity
+  const canIncrement = quantity < product.stock
 
   return (
     <div className="border-border hover:bg-muted/40 flex gap-3 border-b py-3 pr-1 transition-colors last:border-b-0">
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold">{product.name}</p>
-        <p className="text-muted-foreground text-xs tabular-nums">{product.sku}</p>
+        <p className="text-muted-foreground text-xs tabular-nums">
+          {product.sku} - Stok {product.stock}
+        </p>
       </div>
       <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
         <div className="flex items-center gap-1">
@@ -48,7 +51,8 @@ export function CartItemRow({
             type="button"
             size="icon-xs"
             className="size-8 bg-emerald-600 text-white hover:bg-emerald-700"
-            aria-label="Tambah"
+            aria-label={canIncrement ? "Tambah" : "Stok maksimum"}
+            disabled={!canIncrement}
             onClick={onIncrement}
           >
             <PlusIcon className="size-3.5" />

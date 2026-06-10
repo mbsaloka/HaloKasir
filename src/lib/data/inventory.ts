@@ -27,6 +27,7 @@ export function mapProductToCashier(row: typeof products.$inferSelect): CashierP
     name: row.name,
     category: row.category,
     price: row.price,
+    stock: row.stock,
     imageSrc: row.imageSrc,
   }
 }

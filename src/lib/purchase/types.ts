@@ -1,5 +1,6 @@
 export type PurchaseLine = {
   id: string
+  productId: string
   barcode: string
   productName: string
   unitPrice: number

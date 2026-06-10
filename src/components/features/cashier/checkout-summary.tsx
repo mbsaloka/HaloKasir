@@ -20,9 +20,9 @@ export function CheckoutSummary({
         <span className="tabular-nums">{formatRupiah(subtotal)}</span>
       </div>
       <div className="flex justify-between gap-4">
-        <span className="text-muted-foreground">Diskon</span>
+        <span className="text-muted-foreground">Diskon Poin</span>
         <span className="tabular-nums text-emerald-700">
-          {discount > 0 ? `− ${formatRupiah(discount)}` : formatRupiah(0)}
+          {discount > 0 ? `- ${formatRupiah(discount)}` : formatRupiah(0)}
         </span>
       </div>
       <div className="flex justify-between gap-4">

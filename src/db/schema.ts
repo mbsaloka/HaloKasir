@@ -168,6 +168,19 @@ export const suppliers = pgTable(
   (table) => [uniqueIndex("suppliers_name_idx").on(table.name)]
 )
 
+export const appSettings = pgTable("app_settings", {
+  id: text("id").primaryKey(),
+  pointEarnRateBps: integer("point_earn_rate_bps").notNull().default(100),
+  goldPointMultiplierBps: integer("gold_point_multiplier_bps")
+    .notNull()
+    .default(15000),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+})
+
 export const salesTransactions = pgTable(
   "sales_transactions",
   {
@@ -301,6 +314,7 @@ export const accountHistory = pgTable(
 export type ProductRow = typeof products.$inferSelect
 export type MemberRow = typeof members.$inferSelect
 export type SupplierRow = typeof suppliers.$inferSelect
+export type AppSettingsRow = typeof appSettings.$inferSelect
 export type SalesTransactionRow = typeof salesTransactions.$inferSelect
 export type PurchaseRecordRow = typeof purchaseRecords.$inferSelect
 export type UserRow = typeof user.$inferSelect

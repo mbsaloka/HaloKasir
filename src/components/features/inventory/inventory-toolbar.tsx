@@ -80,7 +80,7 @@ export function InventoryToolbar({
             onClick={onAddClick}
           >
             <PlusIcon className="size-4" />
-            Tambah Stok
+            Tambah Item
           </Button>
 
           <Button
